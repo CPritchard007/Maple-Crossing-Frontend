@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 
 class HomePage extends StatelessWidget {
@@ -94,26 +95,43 @@ class _WaitTimeState extends State<WaitTime> {
 class GoogleMaps extends StatefulWidget {
   @override
   _GoogleMapsState createState() => _GoogleMapsState();
+
+  
 }
 
 class _GoogleMapsState extends State<GoogleMaps> {
- GoogleMapController gmc;
+ 
+  GoogleMapController gmc;
+  String _mapStyle;
 
+@override
+    void initState() {
+      super.initState();
+      rootBundle.loadString('assets/styling/MapStyle.txt').then((string) {
+        _mapStyle = string;
+      });
+    }
 
  void _onMapCreated(GoogleMapController controller) {
     gmc = controller;
+    gmc.setMapStyle(_mapStyle);
   }
 
   @override
   Widget build(BuildContext context) {
+
+    
+
     return Expanded(
-      child: GoogleMap(
+      child: GoogleMap(trafficEnabled: true,
           onMapCreated: _onMapCreated,
           initialCameraPosition: CameraPosition(
             target: LatLng(42.311180,-82.859060),
-            zoom: 15
+            zoom: 17
           ),
-          mapType: MapType.hybrid,
+          mapType: MapType.normal,
+          
+        
         ),
     );
   }
