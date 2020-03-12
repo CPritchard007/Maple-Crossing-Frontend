@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 
+
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -10,22 +11,23 @@ class HomePage extends StatelessWidget {
           children: <Widget>[
             buildExchangeBar(),
             Row(children: <Widget>[
-              Expanded(child: Align(child: Text("Border Wait Time"), alignment: Alignment.centerLeft,),),
-              Expanded(child: Align(child: DropDown(), alignment: Alignment.centerRight,),),
+              Text("Border Wait Time")
             ],),
             WaitTime(),
             Row(children: <Widget>[
               Text("Traffic")
             ],),
             GoogleMaps()
-
           ],
-    );
+      );
   }
 }
 
+
+
+
 Container buildExchangeBar() {
-    int mun = 100;
+    int mon = 100;
     return Container(
               color: Colors.yellow,
               height: 30,
@@ -33,7 +35,7 @@ Container buildExchangeBar() {
                 children: <Widget>[
                   Expanded( child: Align(child: Text("Exchange Rate:"), 
                   alignment: Alignment.centerLeft,)),
-                  Expanded( child: Align(child: Text("\$${mun}"), 
+                  Expanded( child: Align(child: Text("\$${mon}"), 
                   alignment: Alignment.centerRight,))
                 ],
               )
@@ -41,19 +43,7 @@ Container buildExchangeBar() {
   }
 
 
-class DropDown extends StatefulWidget {
-  @override
-  _DropDownState createState() => _DropDownState();
-}
 
-class _DropDownState extends State<DropDown> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      
-    );
-  }
-}
 
 
 class WaitTime extends StatefulWidget {
@@ -130,8 +120,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
             zoom: 17
           ),
           mapType: MapType.normal,
-          
-        
+
         ),
     );
   }

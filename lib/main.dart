@@ -14,17 +14,17 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: Color.fromRGBO(254, 95, 95, 1)
       ),
-      home: BottomNav()
+      home: PrimaryScene(),
       );
   }
 }
 
-class BottomNav extends StatefulWidget {
+class PrimaryScene extends StatefulWidget {
   @override
-  _BottomNavState createState() => _BottomNavState();
+  _PrimarySceneState createState() => _PrimarySceneState();
 }
 
-class _BottomNavState extends State<BottomNav> {
+class _PrimarySceneState extends State<PrimaryScene> {
     int _currentIndex = 0;
     var _page = [
         HomePage(),
@@ -36,19 +36,9 @@ class _BottomNavState extends State<BottomNav> {
   @override
   Widget build(BuildContext context) {
 
-    return new Scaffold(
-      appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(50)
-            ),
-          ),
-        ),
-        title: Text("Maple Crossing"),
-      ),
+    return Scaffold (
+
+      appBar: buildAppBar(),
 
       body: _page[_currentIndex],
 
@@ -82,7 +72,38 @@ class _BottomNavState extends State<BottomNav> {
             _currentIndex = index;
           })
         },
-    ));
+    )
+    );
+  }
+
+AppBar buildAppBar() {
+    return AppBar(
+      leading: PopupMenuButton<int>(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+                color: Colors.white
+              ),
+            ),
+          ),
+          offset: Offset(0, 80),
+          itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 1,
+                  child: Text("Profile"),
+                ),
+                PopupMenuItem(
+                  value: 2,
+                  child: Text("Notifications"),
+                ),
+                PopupMenuItem(
+                  value: 2,
+                  child: Text("Sign Out"),
+                ),
+              ],
+        ),
+    );
   }
 }
-
