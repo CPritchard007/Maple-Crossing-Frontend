@@ -49,6 +49,8 @@ flutter:
   assets:
     - assets/icons/discussion_button.png
     - assets/icons/events_button.png
+    - assets/icons/eyeClosed.png
+    - assets/icons/welcome_image.png
     - assets/styling/MapStyle.txt
     
   # An image asset can refer to one or more resolution-specific "variants", see
