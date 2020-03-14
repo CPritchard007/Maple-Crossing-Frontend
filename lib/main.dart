@@ -60,15 +60,15 @@ class _PrimarySceneState extends State<PrimaryScene> {
             title: Text("HOME")
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.access_alarms),
+            icon: ImageIcon(AssetImage("assets/icons/discussion_button.png")),
             title: Text("DISCUSSIONS")
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.accessible_forward),
+            icon: Icon(Icons.view_quilt),
             title: Text("INFO")
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance),
+            icon: ImageIcon(AssetImage("assets/icons/events_button.png"),),
             title: Text("EVENTS")
           )
         ],
@@ -80,6 +80,7 @@ class _PrimarySceneState extends State<PrimaryScene> {
             _currentIndex = index;
           })
         },
+        iconSize: 30,
     )
     );
   }
@@ -93,15 +94,7 @@ AppBar buildAppBar(BuildContext context) {
     return AppBar(
       title: Text("Maple Crossing", style: Theme.of(context).textTheme.headline),
       leading: PopupMenuButton<int>(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(50),
-                color: Colors.white
-              ),
-            ),
-          ),
+          child: Icon(Icons.person, size: 40,),
           offset: Offset(0, 80),
           itemBuilder:  (context) => [
                 PopupMenuItem(

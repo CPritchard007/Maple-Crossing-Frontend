@@ -24,6 +24,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
   google_maps_flutter: ^0.5.12
+  http: ^0.12.0+4
 
 
 dev_dependencies:
@@ -51,6 +52,7 @@ flutter:
     - assets/icons/events_button.png
     - assets/icons/eyeClosed.png
     - assets/icons/welcome_image.png
+    - assets/icons/Shrink.png
     - assets/styling/MapStyle.txt
     
   # An image asset can refer to one or more resolution-specific "variants", see

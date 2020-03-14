@@ -12,6 +12,7 @@ class _MapPageState extends State<MapPage> {
 
   GoogleMapController gmc;
   String _mapStyle;
+  bool _trafficEnabled = true;
 
 @override
     void initState() {
@@ -34,15 +35,8 @@ class _MapPageState extends State<MapPage> {
         primaryColor: Color.fromRGBO(254, 95, 95, 1)
       ),
       home: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () => {
-            setState((){
-              Navigator.pop(context);
-            }),
-          }),
-        ),
         body: Stack(children: <Widget>[ GoogleMap(
-              trafficEnabled: true,
+              trafficEnabled: _trafficEnabled,
               onMapCreated: _onMapCreated,
                initialCameraPosition: CameraPosition(
               target: LatLng(42.311180,-82.859060),
@@ -52,11 +46,50 @@ class _MapPageState extends State<MapPage> {
             myLocationEnabled: true,
             myLocationButtonEnabled: false,
           ),
-          FloatingActionButton(onPressed: () => {
-            
-          },
-          
-          )
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 93.0),
+            child: Align(alignment: Alignment.bottomRight,
+              child: FloatingActionButton(
+                heroTag: "Minimize",
+                onPressed: () => { setState((){
+                  Navigator.pop(context);
+                })
+              },
+              backgroundColor: Colors.white,
+              child: ImageIcon(AssetImage("assets/icons/Shrink.png"), color: Colors.black,size: 32,),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 163.0),
+            child: Align(alignment: Alignment.bottomRight,
+              child: FloatingActionButton(
+                heroTag: "Location",
+                onPressed: () => { setState((){
+
+                })
+              },
+              backgroundColor: Colors.white,
+              child: Icon(Icons.my_location, color: Colors.black ,size: 32,),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 233.0),
+            child: Align(alignment: Alignment.bottomRight,
+              child: FloatingActionButton(
+                heroTag: "ToggleTraffic",
+                onPressed: () => { setState((){
+                _trafficEnabled = !_trafficEnabled;
+
+                })
+              },
+              backgroundColor: Colors.white,
+              child: Icon(Icons.directions_car, color: (_trafficEnabled)? Colors.green : Colors.black ,size: 32,),
+              ),
+            ),
+          ),
+
           ]),
         ),
       );

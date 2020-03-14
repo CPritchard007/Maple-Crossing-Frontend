@@ -52,6 +52,7 @@ class _TextfieldsState extends State<Textfields> {
               decoration: InputDecoration(
               labelText: 'Password',
               suffixIcon: IconButton(color: Color.fromRGBO(160 , 160, 160, 1),
+              splashColor: Color.fromRGBO(0, 0, 0, 0),
               icon: (passwordIsVisable)? Icon( Icons.remove_red_eye ) : Image.asset("assets/icons/eyeClosed.png", color: Color.fromRGBO(160 , 160, 160, 1) ,),
               onPressed: () => setState((){passwordIsVisable = !passwordIsVisable;}), padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
               )
