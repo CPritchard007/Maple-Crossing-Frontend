@@ -10,12 +10,6 @@ class Signin extends StatelessWidget {
         home: Scaffold(
           appBar: AppBar(
             title: Text("Sign In"),
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
           ),
           body: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -34,12 +28,23 @@ class Textfields extends StatefulWidget {
 }
 
 class _TextfieldsState extends State<Textfields> {
+TextEditingController _emailCon;
+TextEditingController _passwordCon;
+
   bool passwordIsVisable = true;
   final RegExp emailReg = new RegExp(
     r"([a-z,A-Z,0-9,.]+)@([a-z,A-Z]+)\.([a-z]+)",
     caseSensitive: false,
     multiLine: false,
   );
+  var _obscure = true;
+
+  @override
+  void initState() {
+    _emailCon = new TextEditingController();
+    _passwordCon = new TextEditingController();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,17 +68,27 @@ class _TextfieldsState extends State<Textfields> {
                     }
                     return null;
                   },
+                  controller: _emailCon,
                 ),
                 TextFormField(
                   decoration: InputDecoration(
                     labelText: 'Password',
+                    suffixIcon: IconButton(icon: _obscure?Icon(Icons.remove_red_eye): ImageIcon(AssetImage("assets/icons/eyeClosed.png")), onPressed: (){
+                      setState(() {
+                        _obscure = !_obscure;
+
+                      });
+                    })
                   ),
+                  controller: _passwordCon,
                   validator: (value) {
                     if (value.isEmpty) {
                       return "a password is required";
                     }
                     return null;
                   },
+                  obscureText: _obscure,
+                  
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -94,9 +109,19 @@ class _TextfieldsState extends State<Textfields> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => MyApp()));
+                                    builder: (context) => LaunchScene()));
                         })
                   ],
+                ),
+                Align(
+                  child: FlatButton(
+                    child: Text("Forgot Password?"),
+                    onPressed: () => {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => Signup()))
+                    },
+                  ),
+                  alignment: Alignment.centerLeft,
                 )
               ],
             )),

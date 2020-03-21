@@ -12,14 +12,16 @@ class Signup extends StatelessWidget {
             title: Text("Sign up"),
             backgroundColor: Color.fromRGBO(254, 95, 95, 1),
           ),
-          body: ListView(
+          body: Padding(padding: EdgeInsets.all(12),
+            child: ListView(
             children: <Widget>[
-              Image(
-                image: AssetImage("assets/icons/welcome_image.png"),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Align(child: Text("Create an account", style: Theme.of(context).textTheme.title,), alignment: Alignment.center,),
               ),
               Padding(padding: const EdgeInsets.all(12.0), child: SignupForm()),
             ],
-          )),
+          ))),
     );
   }
 }
@@ -47,6 +49,7 @@ class _SignupFormState extends State<SignupForm> {
         children: <Widget>[
           TextFormField(
             decoration: InputDecoration(labelText: "first name"),
+            maxLength: 30,
             validator: (value) {
               if (value.isEmpty) {
                 return "a first name is required";
@@ -56,6 +59,7 @@ class _SignupFormState extends State<SignupForm> {
           ),
           TextFormField(
             decoration: InputDecoration(labelText: "last name"),
+            maxLength: 30,
             validator: (value) {
               if (value.isEmpty) {
                 return "a last name is required";
@@ -65,6 +69,7 @@ class _SignupFormState extends State<SignupForm> {
           ),
           TextFormField(
             decoration: InputDecoration(labelText: "username"),
+            maxLength: 30,
             validator: (value) {
               if (value.isEmpty) {
                 return "a username is required";
@@ -74,10 +79,11 @@ class _SignupFormState extends State<SignupForm> {
           ),
           TextFormField(
             decoration: InputDecoration(labelText: "email"),
+            maxLength: 120,
             validator: (value) {
               if (value.isEmpty) {
                 return "an email is required";
-              } else if (!emailReg.hasMatch(value)){
+              } else if (!emailReg.hasMatch(value)) {
                 return "this is not a valid email";
               }
               return null;
@@ -85,6 +91,7 @@ class _SignupFormState extends State<SignupForm> {
           ),
           TextFormField(
             decoration: InputDecoration(labelText: "password"),
+            maxLength: 60,
             validator: (value) {
               if (value.isEmpty) {
                 return "a password is required";
@@ -107,16 +114,12 @@ class _SignupFormState extends State<SignupForm> {
                     _formKey.currentState.validate();
                     if (_formKey.currentState.validate())
                       Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => MyApp()));
+                          MaterialPageRoute(builder: (context) => LaunchScene()));
                   })
             ],
           )
         ],
       ),
     );
-  }
-
-  void generateUsername(String username, String firstName, String lastName) {
-    username = firstName[0] + lastName;
   }
 }

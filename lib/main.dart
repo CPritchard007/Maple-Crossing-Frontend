@@ -8,7 +8,8 @@ import 'package:maple_crossing_application/signinPage.dart';
 
 void main() => runApp(Signin());
 
-class MyApp extends StatelessWidget {
+//this is the setup for the home page
+class LaunchScene extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -21,55 +22,73 @@ class MyApp extends StatelessWidget {
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
                   color: Color.fromRGBO(0, 0, 0, 0.3)))),
-      home: PrimaryScene(),
+      home: ProfileScene(),
     );
   }
 }
 
-class PrimaryScene extends StatefulWidget {
+//this adds the top and bottom nav to the application
+class ProfileScene extends StatefulWidget {
   @override
-  _PrimarySceneState createState() => _PrimarySceneState();
+  _ProfileSceneState createState() => _ProfileSceneState();
 }
 
-class _PrimarySceneState extends State<PrimaryScene> {
+class _ProfileSceneState extends State<ProfileScene> {
+  // current page index
   int _currentIndex = 0;
-  var _page = [
-    HomePage(),
-    DiscussionPage(),
-    InformationPage(),
-    EventPage(),
-  ];
+  // each page per index
+  var _page = {
+    0: HomePage(),
+    1: DiscussionPage(),
+    2: InformationPage(),
+    3: EventPage(),
+  };
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: buildAppBar(context),
-        body: _page[_currentIndex],
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-                icon: Icon(Icons.home), title: Text("HOME")),
-            BottomNavigationBarItem(
-                icon:
-                    ImageIcon(AssetImage("assets/icons/discussion_button.png")),
-                title: Text("DISCUSSIONS")),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.view_quilt), title: Text("INFO")),
-            BottomNavigationBarItem(
-                icon: ImageIcon(
-                  AssetImage("assets/icons/events_button.png"),
-                ),
-                title: Text("EVENTS"))
-          ],
-          currentIndex: _currentIndex,
-          onTap: (index) => {
-            setState(() {
-              _currentIndex = index;
-            })
-          },
-          iconSize: 30,
-        ));
+      appBar: buildAppBar(context),
+      body: _page[_currentIndex],
+      //add bottom navagation
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        // add multiple nav items to the bottom navagation bar
+        items: const <BottomNavigationBarItem>[
+          // home page item
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            title: Text("HOME"),
+          ),
+          // discussion page item
+          BottomNavigationBarItem(
+            icon: ImageIcon(AssetImage("assets/icons/discussion_button.png")),
+            title: Text("DISCUSSIONS"),
+          ),
+          // resource information item
+          BottomNavigationBarItem(
+            icon: Icon(Icons.view_quilt),
+            title: Text("INFO"),
+          ),
+          // events item
+          BottomNavigationBarItem(
+              icon: ImageIcon(
+                AssetImage("assets/icons/events_button.png"),
+              ),
+              title: Text("EVENTS"))
+        ],
+        //set the index to the starting index
+        currentIndex: _currentIndex,
+        onTap: (index) => {
+          setState(() {
+            /* once the application is set, then application will set the state,
+               * and update the page with the new current page.
+               */
+            _currentIndex = index;
+          })
+        },
+        iconSize: 30,
+      ),
+    );
   }
 
   AppBar buildAppBar(BuildContext context) {

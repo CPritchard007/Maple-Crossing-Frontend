@@ -5,30 +5,69 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:maple_crossing_application/MapPage.dart';
 import 'package:http/http.dart' as http;
 
+var _apis = {
+  "Exchange":
+      "https://www.bankofcanada.ca/valet/observations/FXUSDCAD?recent=1",
+  "DWTunnel": 
+      "https://api.dwtunnel.com/api/traffic/conditionspublic",
+  "DWBridge":
+      ""
+};
+
+//  converts exchange rate json to an object
 class ExchangeRate {
   final double dollar;
-
   ExchangeRate({this.dollar});
-
   factory ExchangeRate.fromJson(Map<String, dynamic> json) {
-    print(double.parse(json['observations'][0]["FXUSDCAD"]["v"]));
     return ExchangeRate(
       dollar: double.parse(json['observations'][0]["FXUSDCAD"]["v"]),
     );
   }
 }
-
+// awaits the recieving of json data to the application
 Future<ExchangeRate> fetchExchange(String request) async {
+
   final response = await http.get(request);
 
   if (response.statusCode == 200) {
-    // If the server did return a 200 OK response,
+    // If the server did return a 200 response,
     // then parse the JSON.
     return ExchangeRate.fromJson(json.decode(response.body));
   } else {
-    // If the server did not return a 200 OK response,
+    // If the server recieves another response,
     // then throw an exception.
-    throw Exception('Failed to load album');
+    throw Exception('Failed to load data');
+  }
+}
+// awaits json data from the tunnel api
+class Tunnel {
+  final int minutesTo;
+  final int minutesFrom;
+  final int lanesTo;
+  final int lanesFrom;
+  Tunnel({this.minutesTo, this.minutesFrom, this.lanesTo, this.lanesFrom});
+  //save json data as tunnel object
+  factory Tunnel.fromJson(json) {
+    return Tunnel(
+      minutesTo: int.parse((json[0]['DetailsTravelTime']).substring(2)),
+      minutesFrom: int.parse((json[1]['DetailsTravelTime']).substring(2)),
+      lanesTo: json[0]['CarLaneCount'],
+      lanesFrom: json[1]['CarLaneCount'],
+    );
+  }
+}
+//call for the retrieval of json data
+Future<Tunnel> fetchTunnel(String request) async {
+  final response = await http.get(request);
+
+  if (response.statusCode == 200) {
+    // If the server did return a 200 response,
+    // then parse the JSON.
+    return Tunnel.fromJson(json.decode(response.body));
+  } else {
+    // If the server recieves another response,
+    // then throw an exception.
+    throw Exception('Failed to load data');
   }
 }
 
@@ -37,18 +76,22 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
+        //     USD/CAD Exchange rate              $*.**
         ExchangeBar(),
         Row(
           children: <Widget>[
             Text("Border Wait Time", style: Theme.of(context).textTheme.title)
           ],
         ),
+        //    displays the wait time of the ambasador bridge and Detroit tunnel
         WaitTime(),
+
         Row(
           children: <Widget>[
             Text("Traffic", style: Theme.of(context).textTheme.title)
           ],
         ),
+        //displays the traffic maps of the users location
         GoogleMaps()
       ],
     );
@@ -61,21 +104,17 @@ class ExchangeBar extends StatefulWidget {
 }
 
 class _ExchangeBarState extends State<ExchangeBar> {
-  var _apis = {
-    "Exchange":
-        "https://www.bankofcanada.ca/valet/observations/FXUSDCAD?recent=1",
-    "DWTunnel": "",
-  };
-  int mon = 100;
   var exchange;
   @override
   void initState() {
     super.initState();
+    //before the widget starts, fetch the exchange data from the api
     exchange = fetchExchange(_apis["Exchange"]);
   }
 
   @override
   Widget build(BuildContext context) {
+    //create the exchange rate banner at the top of the application
     return Container(
         color: Colors.yellow,
         height: 25,
@@ -98,7 +137,9 @@ class _ExchangeBarState extends State<ExchangeBar> {
                       return Text(
                           "\$${snapshot.data.dollar.toStringAsFixed(2)}");
                     } else {
-                      return Text(" 🚀");
+                      return Text(
+                        "|",
+                      );
                     }
                   }),
               alignment: Alignment.centerRight,
@@ -120,6 +161,13 @@ class _WaitTimeState extends State<WaitTime> {
   int lanes_1 = 0;
   int lanes_2 = 0;
 
+  var tunnel;
+  @override
+  void initState() {
+    super.initState();
+    tunnel = fetchTunnel(_apis["DWTunnel"]);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -129,31 +177,66 @@ class _WaitTimeState extends State<WaitTime> {
                 color: (side_1 >= side_2) ? Colors.green : Colors.red,
                 height: 180,
                 padding: EdgeInsets.all(8.0),
-                child: Column(
-                  children: <Widget>[
-                    Align(
-                      child: Text(
-                        "$side_1 Min",
-                        style: Theme.of(context).textTheme.display3,
-                      ),
-                      alignment: Alignment.centerLeft,
-                    ),
-                    Align(
-                      child: Text(
-                        "$lanes_1 Lanes",
-                        style: Theme.of(context).textTheme.display2,
-                      ),
-                      alignment: Alignment.centerLeft,
-                    ),
-                    Expanded(
-                        child: Align(
-                      child: Text(
-                        "Detroit Tunnel",
-                        style: Theme.of(context).textTheme.display1,
-                      ),
-                      alignment: Alignment.bottomLeft,
-                    ))
-                  ],
+                child: FutureBuilder<Tunnel>(
+                  future: tunnel,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      side_1 = snapshot.data.minutesTo;
+                      return Column(
+                        children: <Widget>[
+                          Align(
+                            child: Text(
+                              "${snapshot.data.minutesTo.toString()} Min",
+                              style: Theme.of(context).textTheme.display3,
+                            ),
+                            alignment: Alignment.centerLeft,
+                          ),
+                          Align(
+                            child: Text(
+                              "${snapshot.data.lanesTo} Lanes",
+                              style: Theme.of(context).textTheme.display2,
+                            ),
+                            alignment: Alignment.centerLeft,
+                          ),
+                          Expanded(
+                              child: Align(
+                            child: Text(
+                              "Detroit Tunnel",
+                              style: Theme.of(context).textTheme.display1,
+                            ),
+                            alignment: Alignment.bottomLeft,
+                          ))
+                        ],
+                      );
+                    } else {
+                      return Column(
+                        children: <Widget>[
+                          Align(
+                            child: Text(
+                              "- Min",
+                              style: Theme.of(context).textTheme.display3,
+                            ),
+                            alignment: Alignment.centerLeft,
+                          ),
+                          Align(
+                            child: Text(
+                              "- Lanes",
+                              style: Theme.of(context).textTheme.display2,
+                            ),
+                            alignment: Alignment.centerLeft,
+                          ),
+                          Expanded(
+                              child: Align(
+                            child: Text(
+                              "Detroit Tunnel",
+                              style: Theme.of(context).textTheme.display1,
+                            ),
+                            alignment: Alignment.bottomLeft,
+                          ))
+                        ],
+                      );
+                    }
+                  },
                 ))),
         Expanded(
           child: Container(
@@ -206,7 +289,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
     super.initState();
     rootBundle.loadString('assets/styling/MapStyle.txt').then((string) {
       _mapStyle = string;
-    });
+    });    
   }
 
   void _onMapCreated(GoogleMapController controller) {
@@ -254,7 +337,10 @@ class _GoogleMapsState extends State<GoogleMaps> {
               alignment: Alignment.bottomRight,
               child: FloatingActionButton(
                 heroTag: "MyLocation",
-                onPressed: () => {setState(() {})},
+                onPressed: () => {setState(() {
+                  
+
+                })},
                 backgroundColor: Colors.white,
                 child: Icon(
                   Icons.my_location,
