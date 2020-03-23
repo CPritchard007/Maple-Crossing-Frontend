@@ -6,7 +6,10 @@ import 'package:maple_crossing_application/InformationPage.dart';
 import 'package:maple_crossing_application/SignupPage.dart';
 import 'package:maple_crossing_application/signinPage.dart';
 
+
+
 void main() => runApp(Signin());
+
 
 //this is the setup for the home page
 class LaunchScene extends StatelessWidget {

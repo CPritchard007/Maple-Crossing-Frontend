@@ -1,6 +1,43 @@
+import 'dart:convert';
+import 'Const.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'main.dart';
 import 'package:maple_crossing_application/SignupPage.dart';
-import 'package:maple_crossing_application/main.dart';
+import 'package:http/http.dart' as http;
+
+Future<bool> fetchProfile(String user, String pass) async {
+  //build api link
+  final response = await http
+      .post("https://cpritchar.scweb.ca/mapleCrossing/oauth/token", headers: {
+    HttpHeaders.acceptHeader: "application/json",
+    HttpHeaders.contentTypeHeader: "application/x-www-form-urlencoded"
+  }, body: {
+    'grant_type': "password",
+    'client_id': Const.CLIENT_ID,
+    'client_secret': Const.CLIENT_SECRET,
+    'username': user,
+    'password': pass
+  });
+
+  if (response.statusCode == 200) {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    final responseJson = json.decode(response.body);
+
+    pref.setString('accessToken',
+        "${responseJson['token_type']} ${responseJson['access_token']}");
+
+    return true;
+  } else {
+    print('status code ${response.statusCode}: {\n' +
+        'username: $user\n' +
+        'password: $pass\n' +
+        'id:       ${Const.CLIENT_ID}:${Const.CLIENT_SECRET}');
+
+    return false;
+  }
+}
 
 class Signin extends StatelessWidget {
   @override
@@ -28,8 +65,8 @@ class Textfields extends StatefulWidget {
 }
 
 class _TextfieldsState extends State<Textfields> {
-TextEditingController _emailCon;
-TextEditingController _passwordCon;
+  TextEditingController _emailCon;
+  TextEditingController _passwordCon;
 
   bool passwordIsVisable = true;
   final RegExp emailReg = new RegExp(
@@ -72,14 +109,17 @@ TextEditingController _passwordCon;
                 ),
                 TextFormField(
                   decoration: InputDecoration(
-                    labelText: 'Password',
-                    suffixIcon: IconButton(icon: _obscure?Icon(Icons.remove_red_eye): ImageIcon(AssetImage("assets/icons/eyeClosed.png")), onPressed: (){
-                      setState(() {
-                        _obscure = !_obscure;
-
-                      });
-                    })
-                  ),
+                      labelText: 'Password',
+                      suffixIcon: IconButton(
+                          icon: _obscure
+                              ? Icon(Icons.remove_red_eye)
+                              : ImageIcon(
+                                  AssetImage("assets/icons/eyeClosed.png")),
+                          onPressed: () {
+                            setState(() {
+                              _obscure = !_obscure;
+                            });
+                          })),
                   controller: _passwordCon,
                   validator: (value) {
                     if (value.isEmpty) {
@@ -88,7 +128,6 @@ TextEditingController _passwordCon;
                     return null;
                   },
                   obscureText: _obscure,
-                  
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -104,12 +143,12 @@ TextEditingController _passwordCon;
                     IconButton(
                         icon: Icon(Icons.arrow_forward),
                         onPressed: () {
-                          _formKey.currentState.validate();
-                          if (_formKey.currentState.validate())
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => LaunchScene()));
+                          String email = _emailCon.value.text;
+                          String pass = _passwordCon.value.text;
+                          fetchProfile(email, pass).then( (val) => {
+                            val ?  Navigator.push(context,MaterialPageRoute(builder: (context) => LaunchScene())) : null
+                          });
+                          
                         })
                   ],
                 ),

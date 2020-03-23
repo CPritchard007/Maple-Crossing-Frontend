@@ -36,7 +36,7 @@ Future<ExchangeRate> fetchExchange(String request) async {
   } else {
     // If the server recieves another response,
     // then throw an exception.
-    throw Exception('Failed to load data');
+    print('failed to load data');
   }
 }
 // awaits json data from the tunnel api
@@ -67,7 +67,7 @@ Future<Tunnel> fetchTunnel(String request) async {
   } else {
     // If the server recieves another response,
     // then throw an exception.
-    throw Exception('Failed to load data');
+    print("unexpected");
   }
 }
 
