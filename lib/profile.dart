@@ -10,35 +10,29 @@ class profilePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(),
       body: FutureBuilder<User>(
-          future: getUser(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return ListView(
+        future: getUser(),
+        builder: (context, snapshot) {
+          print(snapshot.hasData);
+          return ListView(
+            children: <Widget>[
+              Text("${snapshot.data.firstName} ${snapshot.data.lastName}"),
+              Row(
                 children: <Widget>[
-                  Expanded(
-                    child: Align(
-                      child: Text(snapshot.data.firstName + " " + snapshot.data.lastName),
-                      alignment: Alignment.center,
-                    ),
-                  ),
-                  Row(
-                    children: <Widget>[
-                      Text("username: "),
-                      Text(snapshot.data.username)
-                    ],
-                  ),
-                  Row(
-                    children: <Widget>[
-                      Text("email: "),
-                      Text(snapshot.data.email)
-                    ],
-                  ),
+                  Text("Username: "),
+                  Text(snapshot.data.username)
                 ],
-              );
-            } else {
-              return Container();
-            }
-          }),
+              ),
+              Row(
+                children: <Widget>[
+                  Text("Email: "),
+                  Text(snapshot.data.email)
+                ],
+              ),
+
+            ],
+          );
+        },
+      ),
     );
   }
 }
@@ -57,7 +51,7 @@ Future<User> getUser() async {
   print("name: ${jsonRequest['first_name']} ${jsonRequest['last_name']}");
   print("name: ${jsonRequest['name']}");
   print("name: ${jsonRequest['email']}");
-
+  print(request.statusCode);
   return new User(jsonRequest['first_name'], jsonRequest['last_name'],
       jsonRequest['name'], jsonRequest['email']);
 }

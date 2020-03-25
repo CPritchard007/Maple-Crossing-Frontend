@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:maple_crossing_application/DiscussionPage.dart';
 import 'package:maple_crossing_application/EventPage.dart';
@@ -6,6 +9,10 @@ import 'package:maple_crossing_application/InformationPage.dart';
 import 'package:maple_crossing_application/profile.dart';
 import 'package:maple_crossing_application/signinPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+
+import 'Const.dart';
+
 
 void main() {
   runApp(LoadScreen());
@@ -28,6 +35,7 @@ class LoadScreen extends StatelessWidget {
         future: checkLocalProfileData(),
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data) {
+            
             return LaunchScene();
           } else {
             return SignIn();
@@ -55,8 +63,30 @@ Future<bool> checkLocalProfileData() async {
       pref.getInt("expires_in") <= 86400) {
     return false;
   } else {
+    getNewCredentials();
     return true;
   }
+}
+
+Future<bool> getNewCredentials() async{
+  SharedPreferences pref = await SharedPreferences.getInstance();
+  final response = await http
+      .post("https://cpritchar.scweb.ca/mapleCrossing/oauth/token", headers: {
+    HttpHeaders.acceptHeader: "application/json",
+    HttpHeaders.contentTypeHeader: "application/x-www-form-urlencoded"
+  }, body: {
+    'grant_type': "refresh_token",
+    'client_id': Const.CLIENT_ID,
+    'client_secret': Const.CLIENT_SECRET,
+    'refresh_token': pref.getString("refresh_token"),
+  });
+
+  final jsonResponse = json.decode(response.body);
+  pref.setString('access_token', "Bearer " + jsonResponse['access_token']);
+  pref.setString('refresh_token', jsonResponse['refresh_token']);
+  pref.setInt('expires_in', jsonResponse['expires_in']);
+
+  print("reset all local values...");
 }
 
 //this is the setup for the home page
