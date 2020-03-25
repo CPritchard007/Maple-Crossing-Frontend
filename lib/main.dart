@@ -3,13 +3,14 @@ import 'package:maple_crossing_application/DiscussionPage.dart';
 import 'package:maple_crossing_application/EventPage.dart';
 import 'package:maple_crossing_application/HomePage.dart';
 import 'package:maple_crossing_application/InformationPage.dart';
-import 'package:maple_crossing_application/SignupPage.dart';
+import 'package:maple_crossing_application/profile.dart';
 import 'package:maple_crossing_application/signinPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-    runApp(LoadScreen()); 
+  runApp(LoadScreen());
 }
+
 class LoadScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -23,28 +24,40 @@ class LoadScreen extends StatelessWidget {
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
                   color: Color.fromRGBO(0, 0, 0, 0.3)))),
-      home: FutureBuilder(future: checkLocalProfileData(), builder: (context, snapshot){
-        if (snapshot.hasData && snapshot.data){
+      home: FutureBuilder(
+        future: checkLocalProfileData(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.data) {
             return LaunchScene();
-        }else{
-          return SignIn();
-        }
-      },),
+          } else {
+            return SignIn();
+          }
+        },
+      ),
     );
   }
 }
 
-Future<bool> checkLocalProfileData() async{
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    print(pref.getString("refresh_token") != null? "refresh token:\t🟢" : "refresh token:\t🔴");
-    print(pref.getString("access_token") != null? "access token:\t🟢" : "access token:\t🔴");
-    print(pref.getInt("expires_in") != null? "expires in:\t🟢" : "expires in:\t🔴");
-    if (pref.getString("refresh_token") == null || pref.getString("access_token") == null || pref.getInt("expires_in") == null || pref.getInt("expires_in") <= 86400){
-      return false;
-    }else{
-      return true;
-    }
+Future<bool> checkLocalProfileData() async {
+  SharedPreferences pref = await SharedPreferences.getInstance();
+  print(pref.getString("refresh_token") != null
+      ? "refresh token:\t🟢"
+      : "refresh token:\t🔴");
+  print(pref.getString("access_token") != null
+      ? "access token:\t🟢"
+      : "access token:\t🔴");
+  print(pref.getInt("expires_in") != null
+      ? "expires in:\t🟢"
+      : "expires in:\t🔴");
+  if (pref.getString("refresh_token") == null ||
+      pref.getString("access_token") == null ||
+      pref.getInt("expires_in") == null ||
+      pref.getInt("expires_in") <= 86400) {
+    return false;
+  } else {
+    return true;
   }
+}
 
 //this is the setup for the home page
 class LaunchScene extends StatelessWidget {
@@ -130,8 +143,7 @@ class _ProfileSceneState extends State<ProfileScene> {
   }
 
   AppBar buildAppBar(BuildContext context) {
-    var _items = {1: SignIn(), 2: Signup()};
-
+    var _items = {1: profilePage(), 2: profilePage()};
     return AppBar(
       title:
           Text("Maple Crossing", style: Theme.of(context).textTheme.headline),
@@ -152,10 +164,14 @@ class _ProfileSceneState extends State<ProfileScene> {
           ),
         ],
         onSelected: (index) => {
-          setState(() {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => _items[index]));
-          })
+          setState(
+            () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => _items[index]),
+              );
+            },
+          )
         },
       ),
     );

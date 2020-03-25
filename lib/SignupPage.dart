@@ -10,20 +10,29 @@ class Signup extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(primaryColor: Color.fromRGBO(254, 95, 95, 1)),
       home: Scaffold(
-          appBar: AppBar(
-            title: Text("Sign up"),
-            backgroundColor: Color.fromRGBO(254, 95, 95, 1),
-          ),
-          body: Padding(padding: EdgeInsets.all(12),
-            child: ListView(
+        appBar: AppBar(
+          title: Text("Sign up"),
+          backgroundColor: Color.fromRGBO(254, 95, 95, 1),
+        ),
+        body: Padding(
+          padding: EdgeInsets.all(12),
+          child: ListView(
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Align(child: Text("Create an account", style: Theme.of(context).textTheme.title,), alignment: Alignment.center,),
+                child: Align(
+                  child: Text(
+                    "Create an account",
+                    style: Theme.of(context).textTheme.title,
+                  ),
+                  alignment: Alignment.center,
+                ),
               ),
               Padding(padding: const EdgeInsets.all(12.0), child: SignupForm()),
             ],
-          ))),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -34,7 +43,11 @@ class SignupForm extends StatefulWidget {
 }
 
 class _SignupFormState extends State<SignupForm> {
-TextEditingController _usernameCon, _firstNameCon, _lastNameCon, _emailCon, _passCon;
+  TextEditingController _usernameCon,
+      _firstNameCon,
+      _lastNameCon,
+      _emailCon,
+      _passCon;
 
   final RegExp emailReg = new RegExp(
     r"([a-z,A-Z,0-9,.]+)@([a-z,A-Z]+)\.([a-z]+)",
@@ -55,8 +68,7 @@ TextEditingController _usernameCon, _firstNameCon, _lastNameCon, _emailCon, _pas
   @override
   Widget build(BuildContext context) {
     final _formKey = GlobalKey<FormState>();
-    
-    
+
     return Form(
       key: _formKey,
       child: Column(
@@ -124,27 +136,39 @@ TextEditingController _usernameCon, _firstNameCon, _lastNameCon, _emailCon, _pas
             children: <Widget>[
               FlatButton(
                   onPressed: () => {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => SignIn()))
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SignIn(),
+                          ),
+                        )
                       },
                   child: Text("I already have an account")),
               IconButton(
-                  icon: Icon(Icons.arrow_forward),
-                  onPressed: () {
-                    _formKey.currentState.validate();
-                    if (_formKey.currentState.validate())
-                      registerAccount(
-                        _usernameCon.value.text,
-                        _firstNameCon.value.text,
-                        _lastNameCon.value.text,
-                        _emailCon.value.text,
-                        _passCon.value.text
-                      ).then((val) => {
-                        val ? Navigator.push(context, MaterialPageRoute(builder: (context) => SignIn())) : null
-                      });
-                      // Navigator.push(context,
-                      //     MaterialPageRoute(builder: (context) => LaunchScene()));
-                  })
+                icon: Icon(Icons.arrow_forward),
+                onPressed: () {
+                  _formKey.currentState.validate();
+                  if (_formKey.currentState.validate())
+                    registerAccount(
+                            _usernameCon.value.text,
+                            _firstNameCon.value.text,
+                            _lastNameCon.value.text,
+                            _emailCon.value.text,
+                            _passCon.value.text)
+                        .then(
+                      (val) => {
+                        val
+                            ? Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SignIn(),
+                                ),
+                              )
+                            : null
+                      },
+                    );
+                },
+              )
             ],
           )
         ],
@@ -153,31 +177,32 @@ TextEditingController _usernameCon, _firstNameCon, _lastNameCon, _emailCon, _pas
   }
 }
 
+Future<bool> registerAccount(String username, String firstName, String lastName,
+    String email, String password) async {
+  final response = await http
+      .post("https://cpritchar.scweb.ca/mapleCrossing/api/register", headers: {
+    HttpHeaders.acceptHeader: "application/json",
+    HttpHeaders.contentTypeHeader: "application/x-www-form-urlencoded"
+  }, body: {
+    "name": username,
+    "first_name": firstName,
+    "last_name": lastName,
+    "email": email,
+    "password": password
+  });
+  print("{ \n" +
+      "\tusername: $username \n" +
+      "\tfirst name: $firstName \n" +
+      "\tlast name: $lastName \n" +
+      "\temail: $email \n" +
+      "\tpassword: $password \n" +
+      "}\n" +
+      "${response.body}");
 
-Future<bool> registerAccount(String username, String firstName, String lastName, String email, String password) async {
-  
-  final response = await http.post( "https://cpritchar.scweb.ca/mapleCrossing/api/register" , headers: {HttpHeaders.acceptHeader: "application/json", HttpHeaders.contentTypeHeader: "application/x-www-form-urlencoded"}, 
-  body: {
-        "name": username,
-        "first_name": firstName,
-        "last_name": lastName,
-        "email": email,
-        "password": password
-        });
-  print("{ \n"+
-  "\tusername: $username \n"+
-  "\tfirst name: $firstName \n"+
-  "\tlast name: $lastName \n"+
-  "\temail: $email \n"+
-  "\tpassword: $password \n"+
-  "}\n"+
-  "${response.body}");
-  
-  if (response.statusCode == 201){
+  if (response.statusCode == 201) {
     print("success");
     return true;
-  }
-  else{
+  } else {
     print(response.statusCode);
     return false;
   }

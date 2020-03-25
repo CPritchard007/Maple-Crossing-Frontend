@@ -8,10 +8,8 @@ import 'package:http/http.dart' as http;
 var _apis = {
   "Exchange":
       "https://www.bankofcanada.ca/valet/observations/FXUSDCAD?recent=1",
-  "DWTunnel": 
-      "https://api.dwtunnel.com/api/traffic/conditionspublic",
-  "DWBridge":
-      ""
+  "DWTunnel": "https://api.dwtunnel.com/api/traffic/conditionspublic",
+  "DWBridge": ""
 };
 
 //  converts exchange rate json to an object
@@ -24,9 +22,9 @@ class ExchangeRate {
     );
   }
 }
+
 // awaits the recieving of json data to the application
 Future<ExchangeRate> fetchExchange(String request) async {
-
   final response = await http.get(request);
 
   if (response.statusCode == 200) {
@@ -37,8 +35,10 @@ Future<ExchangeRate> fetchExchange(String request) async {
     // If the server recieves another response,
     // then throw an exception.
     print('failed to load data');
+    return null;
   }
 }
+
 // awaits json data from the tunnel api
 class Tunnel {
   final int minutesTo;
@@ -56,6 +56,7 @@ class Tunnel {
     );
   }
 }
+
 //call for the retrieval of json data
 Future<Tunnel> fetchTunnel(String request) async {
   final response = await http.get(request);
@@ -68,6 +69,7 @@ Future<Tunnel> fetchTunnel(String request) async {
     // If the server recieves another response,
     // then throw an exception.
     print("unexpected");
+    return null;
   }
 }
 
@@ -116,36 +118,37 @@ class _ExchangeBarState extends State<ExchangeBar> {
   Widget build(BuildContext context) {
     //create the exchange rate banner at the top of the application
     return Container(
-        color: Colors.yellow,
-        height: 25,
-        child: Row(
-          children: <Widget>[
-            Expanded(
-                child: Align(
-              child: Text(
-                "USD/CAD Exchange Rate:",
-                style: Theme.of(context).textTheme.subtitle,
-              ),
-              alignment: Alignment.centerLeft,
-            )),
-            Expanded(
-                child: Align(
-              child: FutureBuilder<ExchangeRate>(
-                  future: exchange,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return Text(
-                          "\$${snapshot.data.dollar.toStringAsFixed(2)}");
-                    } else {
-                      return Text(
-                        "|",
-                      );
-                    }
-                  }),
-              alignment: Alignment.centerRight,
-            ))
-          ],
-        ));
+      color: Colors.yellow,
+      height: 25,
+      child: Row(
+        children: <Widget>[
+          Expanded(
+              child: Align(
+            child: Text(
+              "USD/CAD Exchange Rate:",
+              style: Theme.of(context).textTheme.subtitle,
+            ),
+            alignment: Alignment.centerLeft,
+          )),
+          Expanded(
+              child: Align(
+            child: FutureBuilder<ExchangeRate>(
+              future: exchange,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Text("\$${snapshot.data.dollar.toStringAsFixed(2)}");
+                } else {
+                  return Text(
+                    "|",
+                  );
+                }
+              },
+            ),
+            alignment: Alignment.centerRight,
+          ))
+        ],
+      ),
+    );
   }
 }
 
@@ -240,35 +243,36 @@ class _WaitTimeState extends State<WaitTime> {
                 ))),
         Expanded(
           child: Container(
-              color: (side_1 < side_2) ? Colors.green : Colors.red,
-              height: 180,
-              padding: EdgeInsets.all(8.0),
-              child: Column(
-                children: <Widget>[
-                  Align(
-                    child: Text(
-                      "$side_2 Min",
-                      style: Theme.of(context).textTheme.display3,
-                    ),
-                    alignment: Alignment.centerLeft,
+            color: (side_1 < side_2) ? Colors.green : Colors.red,
+            height: 180,
+            padding: EdgeInsets.all(8.0),
+            child: Column(
+              children: <Widget>[
+                Align(
+                  child: Text(
+                    "$side_2 Min",
+                    style: Theme.of(context).textTheme.display3,
                   ),
-                  Align(
-                    child: Text(
-                      "$lanes_2 Lanes",
-                      style: Theme.of(context).textTheme.display2,
-                    ),
-                    alignment: Alignment.centerLeft,
+                  alignment: Alignment.centerLeft,
+                ),
+                Align(
+                  child: Text(
+                    "$lanes_2 Lanes",
+                    style: Theme.of(context).textTheme.display2,
                   ),
-                  Expanded(
-                      child: Align(
-                    child: Text(
-                      "Ambassador Bridge",
-                      style: Theme.of(context).textTheme.display1,
-                    ),
-                    alignment: Alignment.bottomLeft,
-                  )),
-                ],
-              )),
+                  alignment: Alignment.centerLeft,
+                ),
+                Expanded(
+                    child: Align(
+                  child: Text(
+                    "Ambassador Bridge",
+                    style: Theme.of(context).textTheme.display1,
+                  ),
+                  alignment: Alignment.bottomLeft,
+                )),
+              ],
+            ),
+          ),
         ),
       ],
     );
@@ -289,7 +293,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
     super.initState();
     rootBundle.loadString('assets/styling/MapStyle.txt').then((string) {
       _mapStyle = string;
-    });    
+    });
   }
 
   void _onMapCreated(GoogleMapController controller) {
@@ -337,10 +341,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
               alignment: Alignment.bottomRight,
               child: FloatingActionButton(
                 heroTag: "MyLocation",
-                onPressed: () => {setState(() {
-                  
-
-                })},
+                onPressed: () => {setState(() {})},
                 backgroundColor: Colors.white,
                 child: Icon(
                   Icons.my_location,
