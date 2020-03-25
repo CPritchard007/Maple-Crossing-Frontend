@@ -13,6 +13,7 @@ Future<bool> fetchProfile(String user, String pass) async {
       .post("https://cpritchar.scweb.ca/mapleCrossing/oauth/token", headers: {
     HttpHeaders.acceptHeader: "application/json",
     HttpHeaders.contentTypeHeader: "application/x-www-form-urlencoded"
+  
   }, body: {
     'grant_type': "password",
     'client_id': Const.CLIENT_ID,
@@ -25,8 +26,11 @@ Future<bool> fetchProfile(String user, String pass) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     final responseJson = json.decode(response.body);
 
-    pref.setString('accessToken',
+    pref.setString('access_token',
         "${responseJson['token_type']} ${responseJson['access_token']}");
+    pref.setString('refresh_token',
+        "${responseJson['refresh_token']}");
+    pref.setInt("expires_in", responseJson['expires_in']);
 
     return true;
   } else {
@@ -39,25 +43,30 @@ Future<bool> fetchProfile(String user, String pass) async {
   }
 }
 
-class Signin extends StatelessWidget {
+class SignIn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        theme: ThemeData(primaryColor: Color.fromRGBO(254, 95, 95, 1)),
-        home: Scaffold(
-          appBar: AppBar(
-            title: Text("Sign In"),
-          ),
-          body: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Container(
-              height: 500,
-              child: Textfields(),
-            ),
-          ),
-        ));
+    return buildSignInPage();
   }
 }
+
+  MaterialApp buildSignInPage() {
+    return MaterialApp(
+      theme: ThemeData(primaryColor: Color.fromRGBO(254, 95, 95, 1)),
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text("Sign In"),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Container(
+            height: 500,
+            child: Textfields(),
+          ),
+        ),
+      ));
+  }
+
 
 class Textfields extends StatefulWidget {
   @override

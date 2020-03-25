@@ -5,11 +5,46 @@ import 'package:maple_crossing_application/HomePage.dart';
 import 'package:maple_crossing_application/InformationPage.dart';
 import 'package:maple_crossing_application/SignupPage.dart';
 import 'package:maple_crossing_application/signinPage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+void main() {
+    runApp(LoadScreen()); 
+}
+class LoadScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData(
+          primaryColor: Color.fromRGBO(254, 95, 95, 1),
+          textTheme: TextTheme(
+              display3: TextStyle(fontSize: 52, fontWeight: FontWeight.w800),
+              display2: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
+              display1: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  color: Color.fromRGBO(0, 0, 0, 0.3)))),
+      home: FutureBuilder(future: checkLocalProfileData(), builder: (context, snapshot){
+        if (snapshot.hasData && snapshot.data){
+            return LaunchScene();
+        }else{
+          return SignIn();
+        }
+      },),
+    );
+  }
+}
 
-
-void main() => runApp(Signin());
-
+Future<bool> checkLocalProfileData() async{
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    print(pref.getString("refresh_token") != null? "refresh token:\t🟢" : "refresh token:\t🔴");
+    print(pref.getString("access_token") != null? "access token:\t🟢" : "access token:\t🔴");
+    print(pref.getInt("expires_in") != null? "expires in:\t🟢" : "expires in:\t🔴");
+    if (pref.getString("refresh_token") == null || pref.getString("access_token") == null || pref.getInt("expires_in") == null || pref.getInt("expires_in") <= 86400){
+      return false;
+    }else{
+      return true;
+    }
+  }
 
 //this is the setup for the home page
 class LaunchScene extends StatelessWidget {
@@ -95,7 +130,7 @@ class _ProfileSceneState extends State<ProfileScene> {
   }
 
   AppBar buildAppBar(BuildContext context) {
-    var _items = {1: Signin(), 2: Signup()};
+    var _items = {1: SignIn(), 2: Signup()};
 
     return AppBar(
       title:
