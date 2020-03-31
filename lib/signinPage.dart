@@ -154,9 +154,9 @@ class _TextfieldsState extends State<Textfields> {
                         onPressed: () {
                           String email = _emailCon.value.text;
                           String pass = _passwordCon.value.text;
-                          fetchProfile(email, pass).then( (val) => {
-                            val ?  Navigator.push(context,MaterialPageRoute(builder: (context) => LaunchScene())) : null
-                          });
+                          fetchProfile(email, pass).then( (val) => val ?  
+                          Navigator.push(context,MaterialPageRoute(builder: (context) =>  LoadScreen())) : null);
+                          
                           
                         })
                   ],

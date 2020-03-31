@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:maple_crossing_application/DiscussionPage.dart';
 import 'package:maple_crossing_application/EventPage.dart';
@@ -10,9 +9,7 @@ import 'package:maple_crossing_application/profile.dart';
 import 'package:maple_crossing_application/signinPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-
 import 'Const.dart';
-
 
 void main() {
   runApp(LoadScreen());
@@ -23,6 +20,7 @@ class LoadScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
+          backgroundColor: Color.fromRGBO(240, 240, 240, 1),
           primaryColor: Color.fromRGBO(254, 95, 95, 1),
           textTheme: TextTheme(
               display3: TextStyle(fontSize: 52, fontWeight: FontWeight.w800),
@@ -35,8 +33,7 @@ class LoadScreen extends StatelessWidget {
         future: checkLocalProfileData(),
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data) {
-            
-            return LaunchScene();
+            return Scene();
           } else {
             return SignIn();
           }
@@ -68,7 +65,7 @@ Future<bool> checkLocalProfileData() async {
   }
 }
 
-Future<bool> getNewCredentials() async{
+Future<bool> getNewCredentials() async {
   SharedPreferences pref = await SharedPreferences.getInstance();
   final response = await http
       .post("https://cpritchar.scweb.ca/mapleCrossing/oauth/token", headers: {
@@ -82,39 +79,17 @@ Future<bool> getNewCredentials() async{
   });
 
   final jsonResponse = json.decode(response.body);
-  pref.setString('access_token', "Bearer " + jsonResponse['access_token']);
+  pref.setString('access_token', "Bearer ${jsonResponse['access_token']}");
   pref.setString('refresh_token', jsonResponse['refresh_token']);
   pref.setInt('expires_in', jsonResponse['expires_in']);
-
-  print("reset all local values...");
 }
 
-//this is the setup for the home page
-class LaunchScene extends StatelessWidget {
+class Scene extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-          primaryColor: Color.fromRGBO(254, 95, 95, 1),
-          textTheme: TextTheme(
-              display3: TextStyle(fontSize: 52, fontWeight: FontWeight.w800),
-              display2: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
-              display1: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                  color: Color.fromRGBO(0, 0, 0, 0.3)))),
-      home: ProfileScene(),
-    );
-  }
+  _SceneState createState() => _SceneState();
 }
 
-//this adds the top and bottom nav to the application
-class ProfileScene extends StatefulWidget {
-  @override
-  _ProfileSceneState createState() => _ProfileSceneState();
-}
-
-class _ProfileSceneState extends State<ProfileScene> {
+class _SceneState extends State<Scene> {
   // current page index
   int _currentIndex = 0;
   // each page per index
@@ -128,7 +103,7 @@ class _ProfileSceneState extends State<ProfileScene> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar(context),
+      appBar: buildAppBar(context, _currentIndex),
       body: _page[_currentIndex],
       //add bottom navagation
       bottomNavigationBar: BottomNavigationBar(
@@ -172,38 +147,51 @@ class _ProfileSceneState extends State<ProfileScene> {
     );
   }
 
-  AppBar buildAppBar(BuildContext context) {
-    var _items = {1: profilePage(), 2: profilePage()};
-    return AppBar(
-      title:
-          Text("Maple Crossing", style: Theme.of(context).textTheme.headline),
-      leading: PopupMenuButton<int>(
-        child: Icon(
-          Icons.person,
-          size: 40,
-        ),
-        offset: Offset(0, 80),
-        itemBuilder: (context) => [
-          PopupMenuItem(
-            value: 1,
-            child: Text("Notification"),
-          ),
-          PopupMenuItem(
-            value: 2,
-            child: Text("Profile"),
-          ),
-        ],
-        onSelected: (index) => {
-          setState(
-            () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => _items[index]),
-              );
+  AppBar buildAppBar(BuildContext context, int currentIndex) {
+    var _items = {1: ProfilePage(), 2: ProfilePage()};
+    switch (currentIndex) {
+      case 1:
+        return AppBar(
+          title: Text("Discussions"),
+        );
+        break;
+      case 3:
+        return AppBar();
+        break;
+      case 0:
+      case 2:
+      default:
+        return AppBar(
+          title: Text("Maple Crossing",
+              style: Theme.of(context).textTheme.headline),
+          leading: PopupMenuButton<int>(
+            child: Icon(
+              Icons.person,
+              size: 40,
+            ),
+            offset: Offset(0, 80),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 1,
+                child: Text("Notification"),
+              ),
+              PopupMenuItem(
+                value: 2,
+                child: Text("Profile"),
+              ),
+            ],
+            onSelected: (index) => {
+              setState(
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => _items[index]),
+                  );
+                },
+              )
             },
-          )
-        },
-      ),
-    );
+          ),
+        );
+    }
   }
 }

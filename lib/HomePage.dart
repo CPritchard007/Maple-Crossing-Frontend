@@ -319,13 +319,13 @@ class _GoogleMapsState extends State<GoogleMaps> {
             padding: const EdgeInsets.all(10.0),
             child: Align(
               child: FloatingActionButton(
+                backgroundColor: Colors.white,
                 onPressed: () => {
                   setState(() {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => MapPage()));
                   })
                 },
-                backgroundColor: Colors.white,
                 child: Icon(
                   Icons.crop_free,
                   color: Colors.black,
@@ -340,9 +340,9 @@ class _GoogleMapsState extends State<GoogleMaps> {
             child: Align(
               alignment: Alignment.bottomRight,
               child: FloatingActionButton(
+                backgroundColor: Colors.white,
                 heroTag: "MyLocation",
                 onPressed: () => {setState(() {})},
-                backgroundColor: Colors.white,
                 child: Icon(
                   Icons.my_location,
                   color: Colors.black,

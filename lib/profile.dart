@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class profilePage extends StatelessWidget {
+
+class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,13 +53,12 @@ Future<User> getUser() async {
   print("name: ${jsonRequest['name']}");
   print("name: ${jsonRequest['email']}");
   print(request.statusCode);
-  return new User(jsonRequest['first_name'], jsonRequest['last_name'],
-      jsonRequest['name'], jsonRequest['email']);
+  return new User(firstName: jsonRequest['first_name'], lastName: jsonRequest['last_name'], email: jsonRequest['email'], username: jsonRequest['name']);
 }
 
 class User {
   String firstName, lastName, username, email;
-  User(String firstName, String lastName, String username, String email) {
+  User({String firstName, String lastName, String username, String email}) {
     this.firstName = firstName;
     this.lastName = lastName;
     this.username = username;
