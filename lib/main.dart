@@ -12,10 +12,20 @@ import 'package:http/http.dart' as http;
 import 'Const.dart';
 
 void main() {
+  //######################
+  //  ( ▷ ) Starting Scene
   runApp(LoadScreen());
 }
 
 class LoadScreen extends StatelessWidget {
+  //######################################
+  //    The Application will load the
+  //    default scene, including the
+  //    default theme data. after this
+  //    is added, the application will
+  //    check if the application contains
+  //    the users refresh_token, or if
+  //    the user needs to sign in.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -33,40 +43,60 @@ class LoadScreen extends StatelessWidget {
         future: checkLocalProfileData(),
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data) {
+            //the user has joined into the application previously,
+            //this will move the user straight to the home page.
             return Scene();
           } else {
+            //the user has not signed in yet, so the user is sent to
+            //the user signin page.
             return SignIn();
           }
         },
       ),
     );
   }
+  //######################################
 }
 
 Future<bool> checkLocalProfileData() async {
+  //########################################
+  //     does the user need to log in?
   SharedPreferences pref = await SharedPreferences.getInstance();
+
+  // the application has the users refresh token already?
   print(pref.getString("refresh_token") != null
-      ? "refresh token:\t🟢"
-      : "refresh token:\t🔴");
+      ? "refresh token:\t🟢" // YES
+      : "refresh token:\t🔴"); // NO
+  // the applcation has a current access token?
   print(pref.getString("access_token") != null
-      ? "access token:\t🟢"
-      : "access token:\t🔴");
+      ? "access token:\t🟢" // YES
+      : "access token:\t🔴"); // NO
+  // the application has a current expired_in date?
   print(pref.getInt("expires_in") != null
-      ? "expires in:\t🟢"
-      : "expires in:\t🔴");
+      ? "expires in:\t🟢" // YES
+      : "expires in:\t🔴"); // NO
+  // Print the answer to the console and return to LoadScreen()
   if (pref.getString("refresh_token") == null ||
       pref.getString("access_token") == null ||
       pref.getInt("expires_in") == null ||
       pref.getInt("expires_in") <= 86400) {
     return false;
   } else {
+    // refresh new files for the user
     getNewCredentials();
     return true;
   }
 }
 
 Future<bool> getNewCredentials() async {
+  //####################################
+  //    refresh the local values in my phone
+  //   the application must use the current refresh_token
+  //   and generate a new refresh_token, access_token and
+  //   expiration_date each time you log into the application.
+
   SharedPreferences pref = await SharedPreferences.getInstance();
+  // make a call to the user auth token api, to refresh the data
   final response = await http
       .post("https://cpritchar.scweb.ca/mapleCrossing/oauth/token", headers: {
     HttpHeaders.acceptHeader: "application/json",
@@ -77,11 +107,22 @@ Future<bool> getNewCredentials() async {
     'client_secret': Const.CLIENT_SECRET,
     'refresh_token': pref.getString("refresh_token"),
   });
+  if (response.statusCode == 200) {
+    //############################
+    //  decode the information to
+    //  allow my application to
+    //  parse it into the applications
+    //  SharePreferences (local storage).
+    final jsonResponse = json.decode(response.body);
+    pref.setString('access_token', "Bearer ${jsonResponse['access_token']}");
+    pref.setString('refresh_token', jsonResponse['refresh_token']);
+    pref.setInt('expires_in', jsonResponse['expires_in']);
+  } else {
+    // the application has an error, this shouldnt be called.
+    print("invalid response from application");
+  }
 
-  final jsonResponse = json.decode(response.body);
-  pref.setString('access_token', "Bearer ${jsonResponse['access_token']}");
-  pref.setString('refresh_token', jsonResponse['refresh_token']);
-  pref.setInt('expires_in', jsonResponse['expires_in']);
+  //####################################
 }
 
 class Scene extends StatefulWidget {
@@ -90,9 +131,8 @@ class Scene extends StatefulWidget {
 }
 
 class _SceneState extends State<Scene> {
-  // current page index
   int _currentIndex = 0;
-  // each page per index
+
   var _page = {
     0: HomePage(),
     1: DiscussionPage(),
@@ -102,6 +142,12 @@ class _SceneState extends State<Scene> {
 
   @override
   Widget build(BuildContext context) {
+  //####################################
+  //   this is a scene that is used for
+  //   every page. this builds the
+  //   applications bottomNav that calls
+  //   each page once it is pressed.
+
     return Scaffold(
       appBar: buildAppBar(context, _currentIndex),
       body: _page[_currentIndex],
@@ -135,24 +181,38 @@ class _SceneState extends State<Scene> {
         //set the index to the starting index
         currentIndex: _currentIndex,
         onTap: (index) => {
-          setState(() {
-            /* once the application is set, then application will set the state,
+          setState(
+            () {
+              /* once the application is set, then application will set the state,
                * and update the page with the new current page.
                */
-            _currentIndex = index;
-          })
+              _currentIndex = index;
+            },
+          ),
         },
         iconSize: 30,
       ),
     );
+  //######################################
   }
 
   AppBar buildAppBar(BuildContext context, int currentIndex) {
+    //########################################################
+    //   the application needs a new appbar for each page,
+    //   in this way I can update it via the current index
+    //   of the bottom nav using a switch. and case.
     var _items = {1: ProfilePage(), 2: ProfilePage()};
     switch (currentIndex) {
       case 1:
         return AppBar(
-          title: Text("Discussions"),
+          title: TextField(),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.add_circle),
+              onPressed: () {},
+              color: Colors.white,
+            ),
+          ],
         );
         break;
       case 3:
