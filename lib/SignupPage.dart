@@ -121,7 +121,10 @@ class _SignupFormState extends State<SignupForm> {
             },
           ),
           TextFormField(
-            decoration: InputDecoration(labelText: "password"),
+            decoration: InputDecoration(
+              labelText: "password",
+            ),
+            obscureText: true,
             controller: _passCon,
             maxLength: 60,
             validator: (value) {

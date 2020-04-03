@@ -12,7 +12,7 @@ class DiscussionContentPage extends StatelessWidget {
   //       This is the starting location of the
   //       full discussion page.
   //
-  
+
   final String question;
   final List<String> tags;
   final int id;
@@ -26,31 +26,40 @@ class DiscussionContentPage extends StatelessWidget {
   };
   // information passed on from the applications discussion page
   DiscussionContentPage({this.id, this.question, this.tags});
-  
+
   @override
   Widget build(BuildContext context) {
     // list of tags that will be used on the head of the page
     List<Container> tagList = List<Container>();
     Random ran = new Random(colors.length);
-   
-    for (String tag in tags){
+
+    for (String tag in tags) {
       final color = colors[ran.nextInt(colors.length)];
-        tagList.add(new Container(
-          padding: EdgeInsets.fromLTRB(10,5,10,5),
+      tagList.add(
+        new Container(
+          padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
           margin: EdgeInsets.fromLTRB(4, 0, 4, 0),
-          child: Text(tag, style: TextStyle(color: Colors.white),),
-          decoration: BoxDecoration(
-            color: Color.fromRGBO(color[0], color[1], color[2], 1),
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(50)
+          child: Text(
+            tag,
+            style: TextStyle(color: Colors.white),
           ),
+          decoration: BoxDecoration(
+              color: Color.fromRGBO(color[0], color[1], color[2], 1),
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(50)),
         ),
-        );
-    } 
+      );
+    }
 
     return MaterialApp(
       theme: ThemeData(primaryColor: Color.fromRGBO(254, 95, 95, 1)),
       home: Scaffold(
+        floatingActionButton: FloatingActionButton(child: Icon(Icons.add, size: 40), backgroundColor: Color.fromRGBO(254, 95, 95, 1),
+        onPressed: (){
+          setState(){
+            
+          }
+        },),
         appBar: AppBar(
           leading: IconButton(
             icon: Icon(Icons.arrow_back_ios),
@@ -104,29 +113,7 @@ class DiscussionContentPage extends StatelessWidget {
                 ],
               ),
             ),
-            FutureBuilder(
-              future: getAvailableComments(id),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
-                      child: ListView(
-                        children: snapshot.data,
-                      ),
-                    ),
-                  );
-                } else {
-                  return Expanded(
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        value: null,
-                      ),
-                    ),
-                  );
-                }
-              },
-            ),
+            FutureDiscussionList(id),
           ],
         ),
       ),
@@ -134,16 +121,62 @@ class DiscussionContentPage extends StatelessWidget {
   }
 }
 
+class FutureDiscussionList extends StatefulWidget {
+  final id;
+  FutureDiscussionList(this.id);
+  
+  @override
+  _FutureDiscussionListState createState() => _FutureDiscussionListState(this.id);
+  
+}
+
+class _FutureDiscussionListState extends State<FutureDiscussionList> {
+  final id;
+  _FutureDiscussionListState(this.id);
+  
+  Future<List<Card>> _future;  
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+        _future = getAvailableComments(this.id);
+
+  }
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _future,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
+              child: ListView(
+                children: snapshot.data,
+              ),
+            ),
+          );
+        } else {
+          return Expanded(
+            child: Center(
+              child: CircularProgressIndicator(
+                value: null,
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
+}
 
 class Comment {
   final String comment, user;
   Comment({this.comment, this.user});
 }
-
-Future<List<Card>> getAvailableComments(int id) async {
-
+Future<List<Card>> getAvailableComments(id) async {
   List<Comment> comments = new List<Comment>();
-  
+
   final commentsJson = await getComments(id);
   for (final comment in commentsJson['data']) {
     final user = await getUser(comment['user_id']);
@@ -181,30 +214,38 @@ Future getComments(int id) async {
       "https://cpritchar.scweb.ca/mapleCrossing/api/discussion/$id/comment",
       headers: {
         HttpHeaders.acceptHeader: "application/json",
-        HttpHeaders.contentTypeHeader: "x-www-form-urlencoded",
         HttpHeaders.authorizationHeader: pref.getString("access_token")
       });
 
   if (response.statusCode == 200) {
+    print("recieving comments...");
     final responseJson = json.decode(response.body);
     return responseJson;
+  } else {
+      print("unable to grab comments on error: ${response.statusCode}");
+
   }
 }
 
 Future<User> getUser(int id) async {
   final SharedPreferences pref = await SharedPreferences.getInstance();
-  final response = await http
-      .get("https://cpritchar.scweb.ca/mapleCrossing/api/user/$id", headers: {
-    HttpHeaders.acceptHeader: "application/json",
-    HttpHeaders.contentTypeHeader: "x-www-form-urlencoded",
-    HttpHeaders.authorizationHeader: pref.getString("access_token")
-  });
+  final response = await http.get(
+    "https://cpritchar.scweb.ca/mapleCrossing/api/user/$id",
+    headers: {
+      HttpHeaders.acceptHeader: "application/json",
+      HttpHeaders.contentTypeHeader: "x-www-form-urlencoded",
+      HttpHeaders.authorizationHeader: pref.getString("access_token")
+    },
+  );
   if (response.statusCode == 200) {
     final responseJson = json.decode(response.body);
+    print("grabbing users");
     return new User(
         firstName: responseJson['first_name'],
         lastName: responseJson['last_name'],
         email: responseJson['email'],
         username: responseJson['name']);
+  } else {
+    print("unable to grab user on error: ${response.statusCode}");
   }
 }

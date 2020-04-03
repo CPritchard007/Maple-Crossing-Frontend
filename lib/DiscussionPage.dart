@@ -93,7 +93,6 @@ Future<User> getUserByID({int userId, final token}) async {
     "https://cpritchar.scweb.ca/mapleCrossing/api/user/$userId",
     headers: {
       HttpHeaders.acceptHeader: "application/json",
-      HttpHeaders.contentTypeHeader: "x-www-form-urlencoded",
       HttpHeaders.authorizationHeader: token
     },
   );
@@ -208,6 +207,20 @@ class _DiscussionPageState extends State<DiscussionPage> {
 
   @override
   Widget build(BuildContext context) {
+    return FutureListView(future: _future);
+  }
+}
+
+class FutureListView extends StatelessWidget {
+  const FutureListView({
+    Key key,
+    @required Future<List<GestureDetector>> future,
+  }) : _future = future, super(key: key);
+
+  final Future<List<GestureDetector>> _future;
+
+  @override
+  Widget build(BuildContext context) {
     return FutureBuilder(
       future: _future,
       builder: (context, snapshot) {
@@ -236,4 +249,8 @@ class DiscussionItem {
   final String question;
   final List<String> tags;
   DiscussionItem({this.id, this.userId, this.question, this.tags});
+}
+
+buildCreationPage(){
+  return Container();
 }

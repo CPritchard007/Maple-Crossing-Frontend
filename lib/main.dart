@@ -100,7 +100,7 @@ Future<bool> getNewCredentials() async {
   final response = await http
       .post("https://cpritchar.scweb.ca/mapleCrossing/oauth/token", headers: {
     HttpHeaders.acceptHeader: "application/json",
-    HttpHeaders.contentTypeHeader: "application/x-www-form-urlencoded"
+    HttpHeaders.contentTypeHeader: "application/x-www-form-urlencoded",
   }, body: {
     'grant_type': "refresh_token",
     'client_id': Const.CLIENT_ID,
@@ -119,7 +119,7 @@ Future<bool> getNewCredentials() async {
     pref.setInt('expires_in', jsonResponse['expires_in']);
   } else {
     // the application has an error, this shouldnt be called.
-    print("invalid response from application");
+    print("invalid response from application: ${response.statusCode}");
   }
 
   //####################################
@@ -142,11 +142,11 @@ class _SceneState extends State<Scene> {
 
   @override
   Widget build(BuildContext context) {
-  //####################################
-  //   this is a scene that is used for
-  //   every page. this builds the
-  //   applications bottomNav that calls
-  //   each page once it is pressed.
+    //####################################
+    //   this is a scene that is used for
+    //   every page. this builds the
+    //   applications bottomNav that calls
+    //   each page once it is pressed.
 
     return Scaffold(
       appBar: buildAppBar(context, _currentIndex),
@@ -193,7 +193,7 @@ class _SceneState extends State<Scene> {
         iconSize: 30,
       ),
     );
-  //######################################
+    //######################################
   }
 
   AppBar buildAppBar(BuildContext context, int currentIndex) {
@@ -205,12 +205,16 @@ class _SceneState extends State<Scene> {
     switch (currentIndex) {
       case 1:
         return AppBar(
-          title: TextField(),
+          title: Container(
+            margin: const EdgeInsets.all(8.0),
+            child: TextField(),
+          ),
           actions: <Widget>[
             IconButton(
               icon: Icon(Icons.add_circle),
               onPressed: () {},
               color: Colors.white,
+              iconSize: 40,
             ),
           ],
         );
