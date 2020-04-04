@@ -137,7 +137,6 @@ class _FutureDiscussionListState extends State<FutureDiscussionList> {
   Future<List<Card>> _future;  
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
         _future = getAvailableComments(this.id);
 

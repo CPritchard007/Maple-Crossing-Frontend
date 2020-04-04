@@ -6,6 +6,63 @@ import 'package:maple_crossing_application/DiscussionContentPage.dart';
 import 'package:maple_crossing_application/profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+//###########################################
+//      Main page that is displayed
+//      for Discussions
+class DiscussionPage extends StatefulWidget {
+
+  static TextEditingController controller = new TextEditingController();
+  @override
+  _DiscussionPageState createState() => _DiscussionPageState();
+}
+
+class _DiscussionPageState extends State<DiscussionPage> {
+  Future<List<GestureDetector>> _future;
+  @override
+  void initState() {
+    super.initState();
+    _future = getAvailableDiscussions(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureListView(future: _future);
+  }
+}
+
+class FutureListView extends StatelessWidget {
+  const FutureListView({
+    Key key,
+    @required Future<List<GestureDetector>> future,
+  }) : _future = future, super(key: key);
+
+  final Future<List<GestureDetector>> _future;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _future,
+      builder: (context, snapshot) {
+        print(snapshot.hasData);
+        if (snapshot.hasData) {
+          return ListView(
+            children: snapshot.data,
+          );
+        } else {
+          return Container(
+            child: Center(
+              child: CircularProgressIndicator(
+                value: null,
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
+}
+
 Future<List<GestureDetector>> getAvailableDiscussions(
     BuildContext context) async {
   //##################################################
@@ -187,60 +244,6 @@ Card buildCards({String username, String question, List<String> tags}) {
     ),
   );
   //##################################################################
-}
-
-//###########################################
-//      Main page that is displayed
-//      for Discussions
-class DiscussionPage extends StatefulWidget {
-  @override
-  _DiscussionPageState createState() => _DiscussionPageState();
-}
-
-class _DiscussionPageState extends State<DiscussionPage> {
-  Future<List<GestureDetector>> _future;
-  @override
-  void initState() {
-    super.initState();
-    _future = getAvailableDiscussions(context);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureListView(future: _future);
-  }
-}
-
-class FutureListView extends StatelessWidget {
-  const FutureListView({
-    Key key,
-    @required Future<List<GestureDetector>> future,
-  }) : _future = future, super(key: key);
-
-  final Future<List<GestureDetector>> _future;
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _future,
-      builder: (context, snapshot) {
-        print(snapshot.hasData);
-        if (snapshot.hasData) {
-          return ListView(
-            children: snapshot.data,
-          );
-        } else {
-          return Container(
-            child: Center(
-              child: CircularProgressIndicator(
-                value: null,
-              ),
-            ),
-          );
-        }
-      },
-    );
-  }
 }
 
 class DiscussionItem {

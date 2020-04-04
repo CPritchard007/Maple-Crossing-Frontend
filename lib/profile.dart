@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+TextEditingController searchController = new TextEditingController();
 
 class ProfilePage extends StatelessWidget {
   @override
@@ -13,7 +14,7 @@ class ProfilePage extends StatelessWidget {
       body: FutureBuilder<User>(
         future: getUser(),
         builder: (context, snapshot) {
-          print(snapshot.hasData);
+         if(snapshot.hasData){
           return ListView(
             children: <Widget>[
               Text("${snapshot.data.firstName} ${snapshot.data.lastName}"),
@@ -32,6 +33,9 @@ class ProfilePage extends StatelessWidget {
 
             ],
           );
+         } else {
+           return Container();
+         }
         },
       ),
     );

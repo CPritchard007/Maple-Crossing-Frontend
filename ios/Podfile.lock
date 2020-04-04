@@ -22,8 +22,6 @@ PODS:
     - Flutter
   - shared_preferences_web (0.0.1):
     - Flutter
-  - vibration (1.2.4):
-    - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
@@ -35,7 +33,6 @@ DEPENDENCIES:
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - shared_preferences_macos (from `.symlinks/plugins/shared_preferences_macos/ios`)
   - shared_preferences_web (from `.symlinks/plugins/shared_preferences_web/ios`)
-  - vibration (from `.symlinks/plugins/vibration/ios`)
 
 SPEC REPOS:
   trunk:
@@ -60,8 +57,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences_macos/ios"
   shared_preferences_web:
     :path: ".symlinks/plugins/shared_preferences_web/ios"
-  vibration:
-    :path: ".symlinks/plugins/vibration/ios"
 
 SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
@@ -74,7 +69,6 @@ SPEC CHECKSUMS:
   shared_preferences: 430726339841afefe5142b9c1f50cb6bd7793e01
   shared_preferences_macos: f3f29b71ccbb56bf40c9dd6396c9acf15e214087
   shared_preferences_web: 141cce0c3ed1a1c5bf2a0e44f52d31eeb66e5ea9
-  vibration: f0c5bb486671fb81e973bfb451d89f8efd07c9c9
 
 PODFILE CHECKSUM: 1b66dae606f75376c5f2135a8290850eeb09ae83
 
