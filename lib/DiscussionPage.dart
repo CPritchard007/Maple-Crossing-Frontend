@@ -84,92 +84,89 @@ class _CreateDiscussionState extends State<CreateDiscussion> {
 
   @override
   Widget build(BuildContext context) {
-    return buildMaterial(
-      child: Scaffold(
-        backgroundColor: Theme.of(context).primaryColor.withAlpha(180),
-        appBar: AppBar(
-          title: Text('Create Discussion'),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
+    return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor.withAlpha(180),
+      appBar: AppBar(
+        title: Text('Create Discussion'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
-        body: Container(
-          margin: EdgeInsets.fromLTRB(10, 40, 10, 40),
-          padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-          decoration: BoxDecoration(
-              color: Colors.white,
-              border:
-                  Border.all(color: Color.fromRGBO(200, 95, 95, 1), width: 2),
-              borderRadius: BorderRadius.circular(20)),
-          child: Form(
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemBuilder: (context, position) {
-                if (position == 0) {
-                  return TextFormField(
-                    decoration: InputDecoration(labelText: "question"),
-                    maxLength: 250,
-                    maxLengthEnforced: true,
-                    maxLines: null,
-                    controller: questionController,
-                  );
-                } else if (position > tagsController.length) {
-                  return Padding(
-                    padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-                    child: IconButton(
-                      icon: Icon(Icons.send),
-                      alignment: Alignment.centerRight,
-                      onPressed: () {
-                        submitDiscussionData(
-                            questionController, tagsController);
-                            Navigator.push(context, MaterialPageRoute(builder:(context)=> Scene(1)));
-
-                      },
-                    ),
-                  );
-                } else {
-                  TextEditingController tag = tagsController[position - 1];
-                  int pos = position - 1;
-                  return Row(
-                    children: <Widget>[
-                      Container(
-                        width: 200,
-                        child: TextFormField(
-                          controller: tagsController[pos],
-                          decoration: InputDecoration(labelText: "tag $pos"),
-                        ),
+      ),
+      body: Container(
+        margin: EdgeInsets.fromLTRB(10, 40, 10, 40),
+        padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Color.fromRGBO(200, 95, 95, 1), width: 2),
+            borderRadius: BorderRadius.circular(20)),
+        child: Form(
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemBuilder: (context, position) {
+              if (position == 0) {
+                return TextFormField(
+                  decoration: InputDecoration(labelText: "question"),
+                  maxLength: 250,
+                  maxLengthEnforced: true,
+                  maxLines: null,
+                  controller: questionController,
+                );
+              } else if (position > tagsController.length) {
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                  child: IconButton(
+                    icon: Icon(Icons.send),
+                    alignment: Alignment.centerRight,
+                    onPressed: () {
+                      submitDiscussionData(questionController, tagsController);
+                      setState(() {
+                        Navigator.pop(context);
+                      });
+                    },
+                  ),
+                );
+              } else {
+                TextEditingController tag = tagsController[position - 1];
+                int pos = position - 1;
+                return Row(
+                  children: <Widget>[
+                    Container(
+                      width: 200,
+                      child: TextFormField(
+                        controller: tagsController[pos],
+                        decoration: InputDecoration(labelText: "tag $pos"),
                       ),
-                      pos + 1 == tagsController.length
-                          ? IconButton(
-                              icon: Icon(Icons.add_circle),
-                              color: Theme.of(context).primaryColor,
-                              onPressed: () {
-                                setState(() {
-                                  if (tagsController.length < 4)
-                                    tagsController
-                                        .add(new TextEditingController());
-                                });
-                              })
-                          : IconButton(
-                              icon: Icon(Icons.remove_circle),
-                              color: Colors.grey,
-                              onPressed: () {
-                                setState(
-                                  () {
-                                    tagsController.removeAt(pos);
-                                  },
-                                );
-                              },
-                            )
-                    ],
-                  );
-                }
-              },
-              itemCount: tagsController.length + 2,
-            ),
+                    ),
+                    pos + 1 == tagsController.length
+                        ? IconButton(
+                            icon: Icon(Icons.add_circle),
+                            color: Theme.of(context).primaryColor,
+                            onPressed: () {
+                              setState(() {
+                                if (tagsController.length < 4)
+                                  tagsController
+                                      .add(new TextEditingController());
+                              });
+                            })
+                        : IconButton(
+                            icon: Icon(Icons.remove_circle),
+                            color: Colors.grey,
+                            onPressed: () {
+                              setState(
+                                () {
+                                  tagsController.removeAt(pos);
+                                },
+                              );
+                            },
+                          )
+                  ],
+                );
+              }
+            },
+            itemCount: tagsController.length + 2,
           ),
         ),
       ),
@@ -181,17 +178,15 @@ class _CreateDiscussionState extends State<CreateDiscussion> {
     final SharedPreferences pref = await SharedPreferences.getInstance();
     String tagsToString = "";
 
-      tagsController.forEach((val){
-        if(val.value.text != "")
-        tagsToString += "${val.value.text},";
-      });
-      tagsToString = tagsToString.substring(0, tagsToString.length-1);
-    
+    tagsController.forEach((val) {
+      if (val.value.text != "") tagsToString += "${val.value.text},";
+    });
+    tagsToString = tagsToString.substring(0, tagsToString.length - 1);
 
     if (tagsToString[tagsToString.length - 1] == ',')
       tagsToString = tagsToString.substring(0, tagsToString.length - 1);
     print(tagsToString);
-    
+
     final response = await http.post(
       "https://cpritchar.scweb.ca/mapleCrossing/api/discussion",
       headers: {
@@ -201,7 +196,7 @@ class _CreateDiscussionState extends State<CreateDiscussion> {
       body: {
         "question": question.value.text,
         "tag": tagsToString,
-        "user_id": pref.getInt("user_id")
+        "user_id": "${pref.getInt("user_id")}"
       },
     );
 

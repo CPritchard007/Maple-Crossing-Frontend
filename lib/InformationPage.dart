@@ -8,8 +8,8 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 class InformationPage extends StatefulWidget {
-///############################################
-///
+  ///############################################
+  ///
   static TextEditingController controller = new TextEditingController();
   @override
   _InformationPageState createState() => _InformationPageState();
@@ -46,10 +46,12 @@ class _InformationPageState extends State<InformationPage> {
                 /// controllers allow the user to store the current status of the Widget (Slidable), allowing me  to
                 /// manipulate it manually.
                 controller: _controller,
+
                 /// how far will the slider extend to..
                 actionExtentRatio: 0.25,
                 child: item,
                 delegate: SlidableDrawerDelegate(),
+
                 /// the slider allows you to effect [actions] and [secondaryActions] parameters. this disctates wether you want to effect
                 /// the left or the right side of the item as a slider. as used in this application, it is to be slid left
                 secondaryActions: <Widget>[
@@ -70,17 +72,18 @@ class _InformationPageState extends State<InformationPage> {
                                 iconSize: 60,
                                 onPressed: () {
                                   ///on pressed alert the user that a resource is being deleted
-                                  Scaffold.of(context)
-                                      .showSnackBar(new SnackBar(
-                                    content: Text('pressed'),
-                                    duration: Duration(seconds: 5),
-                                  ),
-                                );
+                                  Scaffold.of(context).showSnackBar(
+                                    new SnackBar(
+                                      content: Text('pressed'),
+                                      duration: Duration(seconds: 5),
+                                    ),
+                                  );
                                 },
                               ),
                             ),
                           ),
                         ),
+
                         /// EDIT
                         Expanded(
                           child: Container(
@@ -126,7 +129,7 @@ class _InformationPageState extends State<InformationPage> {
 
 Future<List<Card>> getAllResources() async {
   ///########################################
-  ///  this is the primary function that pulls 
+  ///  this is the primary function that pulls
   ///  for resource data. once the application
   ///  has reached over 30 individual resources
   ///  it will need to pull a new page of api's.
@@ -139,6 +142,7 @@ Future<List<Card>> getAllResources() async {
     "https://cpritchar.scweb.ca/mapleCrossing/api/resource",
     headers: {
       HttpHeaders.acceptHeader: "application/json",
+
       ///  get the users access token they recieved from logging into the application.
       HttpHeaders.authorizationHeader: pref.getString("access_token"),
     },
@@ -158,6 +162,7 @@ Future<List<Card>> getAllResources() async {
           favourite: false,
           id: resource['id']));
     }
+
     /// using that list of resources, pass the information on the the builder, and create a list of functioning resource cards
     final gestureList = buildResources(resources);
     return gestureList;
@@ -217,7 +222,7 @@ buildResources(List<Resource> resources) {
 }
 
 class SideMenu extends StatefulWidget {
-/// find more informaiton at _SideMenuState
+  /// find more informaiton at _SideMenuState
   SideMenu({this.resource});
   final Resource resource;
 
@@ -233,10 +238,11 @@ class _SideMenuState extends State<SideMenu> {
   ///    as well as adding a, icon to show that
   ///    the user can interact with the menu by
   ///    dragging. this will not be displayed if
-  ///    the iser does not have the ability to 
+  ///    the iser does not have the ability to
   ///    remove resources.
-  ///    
+  ///
   _SideMenuState(this.resource);
+
   ///store the current resource for each list item
   Resource resource;
   @override
@@ -259,7 +265,7 @@ class _SideMenuState extends State<SideMenu> {
             ),
           ),
           IconButton(
-            ///if the user has favourited this item already, the item will be removed, or the opposite 
+            ///if the user has favourited this item already, the item will be removed, or the opposite
             icon: Icon(resource.favourite ? Icons.star : Icons.star_border),
             onPressed: () {
               setState(
@@ -296,4 +302,102 @@ class Resource {
       this.resourceText,
       this.favourite,
       this.id});
+}
+
+class CreateInformation extends StatefulWidget {
+  @override
+  _CreateInformationState createState() => _CreateInformationState();
+}
+
+class _CreateInformationState extends State<CreateInformation> {
+  TextEditingController titleController;
+  TextEditingController contentController;
+
+  @override
+  void initState() {
+    super.initState();
+    titleController = TextEditingController();
+    contentController = TextEditingController();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Scaffold(
+        backgroundColor: Theme.of(context).primaryColor.withAlpha(180),
+        appBar: AppBar(
+          title: Text('Create Resource'),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ),
+        body: Container(
+          margin: EdgeInsets.fromLTRB(10, 40, 10, 40),
+          padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+          decoration: BoxDecoration(
+              color: Colors.white,
+              border:
+                  Border.all(color: Color.fromRGBO(200, 95, 95, 1), width: 2),
+              borderRadius: BorderRadius.circular(20)),
+          child: Form(
+            child: Container(
+              padding: EdgeInsets.all(10),
+              child: ListView(
+                shrinkWrap: true,
+                children: <Widget>[
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                        width: 220,
+                        child: TextFormField(decoration: InputDecoration(labelText: "title"),
+                        controller: titleController,),
+                      ),
+                      TextFormField(decoration: InputDecoration(labelText: "content"),maxLength: 400, maxLines: null,
+                      controller: contentController,),
+                      IconButton(
+                    icon: Icon(Icons.send),
+                    alignment: Alignment.centerRight,
+                    onPressed: () {
+                      submitResources(title: titleController.value.text, content: contentController.value.text);
+                      setState(() {
+                        Navigator.pop(context);
+                      });
+                    },
+                  ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+Future<void> submitResources({String title, content}) async {
+  
+  final SharedPreferences pref = await SharedPreferences.getInstance();
+  final response = await http.post("https://cpritchar.scweb.ca/mapleCrossing/api/resource",
+  headers: {
+    HttpHeaders.acceptHeader: "application/json",
+    HttpHeaders.authorizationHeader: pref.getString("access_token")
+  },
+  body: {
+    "title": title,
+    "content": content,
+    "user_id": "${pref.getInt("user_id")}"
+  });
+  print(pref.getString("access_token"));
+  if (response.statusCode == 200){
+    print("successfull");
+  } else {
+
+  }
 }

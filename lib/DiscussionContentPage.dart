@@ -15,6 +15,7 @@ class DiscussionContentPage extends StatelessWidget {
   ///       full discussion page.
   ///
 
+  DiscussionContentPage({this.id, this.question, this.tags});
   final String question;
   final List<String> tags;
   final int id;
@@ -26,8 +27,8 @@ class DiscussionContentPage extends StatelessWidget {
     4: [126, 108, 167],
     5: [38, 70, 53]
   };
+
   /// information passed on from the applications discussion page
-  DiscussionContentPage({this.id, this.question, this.tags});
 
   @override
   Widget build(BuildContext context) {
@@ -53,13 +54,14 @@ class DiscussionContentPage extends StatelessWidget {
       );
     }
 
-    return buildMaterial(child: Scaffold(
-        floatingActionButton: FloatingActionButton(child: Icon(Icons.add, size: 40), backgroundColor: Color.fromRGBO(254, 95, 95, 1),
-        onPressed: (){
-          setState(){
-            
-          }
-        },),
+    return Scaffold(
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add, size: 40),
+          backgroundColor: Color.fromRGBO(254, 95, 95, 1),
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateComment(id)));
+          },
+        ),
         appBar: AppBar(
           leading: IconButton(
             icon: Icon(Icons.arrow_back_ios),
@@ -116,7 +118,6 @@ class DiscussionContentPage extends StatelessWidget {
             FutureDiscussionList(id),
           ],
         ),
-      ),
     );
   }
 }
@@ -124,23 +125,23 @@ class DiscussionContentPage extends StatelessWidget {
 class FutureDiscussionList extends StatefulWidget {
   final id;
   FutureDiscussionList(this.id);
-  
+
   @override
-  _FutureDiscussionListState createState() => _FutureDiscussionListState(this.id);
-  
+  _FutureDiscussionListState createState() =>
+      _FutureDiscussionListState(this.id);
 }
 
 class _FutureDiscussionListState extends State<FutureDiscussionList> {
   final id;
   _FutureDiscussionListState(this.id);
-  
-  Future<List<Card>> _future;  
+
+  Future<List<Card>> _future;
   @override
   void initState() {
     super.initState();
-        _future = getAvailableComments(this.id);
-
+    _future = getAvailableComments(this.id);
   }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -173,6 +174,7 @@ class Comment {
   final String comment, user;
   Comment({this.comment, this.user});
 }
+
 Future<List<Card>> getAvailableComments(id) async {
   List<Comment> comments = new List<Comment>();
 
@@ -221,8 +223,7 @@ Future getComments(int id) async {
     final responseJson = json.decode(response.body);
     return responseJson;
   } else {
-      print("unable to grab comments on error: ${response.statusCode}");
-
+    print("unable to grab comments on error: ${response.statusCode}");
   }
 }
 
@@ -246,5 +247,87 @@ Future<User> getUser(int id) async {
         username: responseJson['name']);
   } else {
     print("unable to grab user on error: ${response.statusCode}");
+  }
+}
+
+class CreateComment extends StatefulWidget {
+  CreateComment(this.id);
+  final id;
+  @override
+  _CreateCommentState createState() => _CreateCommentState(id);
+}
+
+class _CreateCommentState extends State<CreateComment> {
+  _CreateCommentState(this.id);
+  
+  final id;
+  TextEditingController commentController;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    commentController = TextEditingController();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor.withAlpha(180),
+      appBar: AppBar(
+        title: Text('Create Comment'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: Container(
+        margin: EdgeInsets.fromLTRB(10, 40, 10, 40),
+        padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Color.fromRGBO(200, 95, 95, 1), width: 2),
+            borderRadius: BorderRadius.circular(20)),
+        child: Form(
+          child: ListView(
+            shrinkWrap: true,
+            children: <Widget>[
+            TextFormField(decoration: InputDecoration(labelText: "comment"), maxLength: 250, maxLengthEnforced: true, maxLines: null,controller: commentController,),
+            IconButton(
+                    icon: Icon(Icons.send),
+                    alignment: Alignment.centerRight,
+                    onPressed: () {
+                      submitComment(comment: commentController.value.text, discussionId: id);
+                      setState(() {
+                        Navigator.pop(context);
+                      });
+                    },
+                  ),
+          ],),
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> submitComment({String comment, int discussionId}) async {
+  SharedPreferences pref = await SharedPreferences.getInstance();
+  final response = await http.post("https://cpritchar.scweb.ca/mapleCrossing/api/comment",
+  headers: {
+    HttpHeaders.acceptHeader: "application/json",
+    HttpHeaders.authorizationHeader: pref.getString("access_token")
+  },
+  body: {
+    "discussion_id": "${discussionId}",
+    "comment": comment,
+    "user_id": "${pref.getInt("user_id")}"
+  });
+
+  if (response.statusCode == 200){
+    
+  } else {
+    print(response.statusCode);
   }
 }

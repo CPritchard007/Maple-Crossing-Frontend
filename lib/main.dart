@@ -14,9 +14,10 @@ import 'Const.dart';
 void main() {
   ///######################
   ///  ( ▷ ) Starting Scene
+  /// 
   runApp(LoadScreen());
 }
-
+BuildContext mainContext;
 class LoadScreen extends StatelessWidget {
   ///######################################
   ///    The Application will load the
@@ -28,8 +29,10 @@ class LoadScreen extends StatelessWidget {
   ///    the user needs to sign in.
   @override
   Widget build(BuildContext context) {
+    mainContext = context;
     return 
       buildMaterial(child: FutureBuilder(
+        
         future: checkLocalProfileData(),
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data) {
@@ -214,8 +217,8 @@ class _SceneState extends State<Scene> {
     ///   the application needs a new appbar for each page,
     ///   in this way I can update it via the current index
     ///   of the bottom nav using a switch. and case.
-    var _items = {1: ProfilePage(), 2: ProfilePage()};
-    const int fontSize = 18;
+    var _items = {1: SignIn(), 2: ProfilePage()};
+    
     switch (currentIndex) {
       case 1:
       case 2:
@@ -224,7 +227,7 @@ class _SceneState extends State<Scene> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Container(
-                width: 270,
+                width: 250,
                 height: 30,
                 child: TextField(controller: currentIndex == 1? DiscussionPage.controller : InformationPage.controller,
                 decoration: InputDecoration(
@@ -240,20 +243,22 @@ class _SceneState extends State<Scene> {
                   
                 ),
               ),
-              IconButton(
-                  icon: Icon(Icons.search),
-                  onPressed: () {
-                    setState(() {
-                      print("searched ${DiscussionPage.controller.value.text}");
-                    });
-                  })
+              Container(
+                child: IconButton(
+                    icon: Icon(Icons.search),
+                    onPressed: () {
+                      setState(() {
+                        print("searched ${DiscussionPage.controller.value.text}");
+                      });
+                    }),
+              )
             ],
           ),
           actions: <Widget>[
             IconButton(
               icon: Icon(Icons.add_circle),
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => CreateDiscussion()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => (_currentIndex == 1? CreateDiscussion() : CreateInformation())));
               },
               color: Colors.white,
               iconSize: 40,
@@ -291,7 +296,7 @@ class _SceneState extends State<Scene> {
                 () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => SignIn()),
+                    MaterialPageRoute(builder: (context) => _items[index]),
                   );
                 },
               )
