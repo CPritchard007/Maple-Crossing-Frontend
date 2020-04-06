@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:maple_crossing_application/DiscussionPage.dart';
@@ -13,23 +12,44 @@ import 'package:http/http.dart' as http;
 import 'Const.dart';
 
 void main() {
-  //######################
-  //  ( ▷ ) Starting Scene
+  ///######################
+  ///  ( ▷ ) Starting Scene
   runApp(LoadScreen());
 }
 
 class LoadScreen extends StatelessWidget {
-  //######################################
-  //    The Application will load the
-  //    default scene, including the
-  //    default theme data. after this
-  //    is added, the application will
-  //    check if the application contains
-  //    the users refresh_token, or if
-  //    the user needs to sign in.
+  ///######################################
+  ///    The Application will load the
+  ///    default scene, including the
+  ///    default theme data. after this
+  ///    is added, the application will
+  ///    check if the application contains
+  ///    the users refresh_token, or if
+  ///    the user needs to sign in.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return 
+      buildMaterial(child: FutureBuilder(
+        future: checkLocalProfileData(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.data) {
+            ///the user has joined into the application previously,
+            ///this will move the user straight to the home page.
+            return Scene(0);
+          } else {
+            ///the user has not signed in yet, so the user is sent to
+            ///the user signin page.
+            return SignIn();
+          }
+        },
+      ),
+    );
+  }
+  ///######################################
+}
+
+Widget buildMaterial({Widget child}){
+  return MaterialApp(
       theme: ThemeData(
           backgroundColor: Color.fromRGBO(240, 240, 240, 1),
           primaryColor: Color.fromRGBO(254, 95, 95, 1),
@@ -40,42 +60,30 @@ class LoadScreen extends StatelessWidget {
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
                   color: Color.fromRGBO(0, 0, 0, 0.3)))),
-      home: FutureBuilder(
-        future: checkLocalProfileData(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData && snapshot.data) {
-            //the user has joined into the application previously,
-            //this will move the user straight to the home page.
-            return Scene();
-          } else {
-            //the user has not signed in yet, so the user is sent to
-            //the user signin page.
-            return SignIn();
-          }
-        },
-      ),
+      home: child
     );
-  }
-  //######################################
 }
 
 Future<bool> checkLocalProfileData() async {
-  //########################################
-  //     does the user need to log in?
+  ///########################################
+  ///     does the user need to log in?
   SharedPreferences pref = await SharedPreferences.getInstance();
 
   // the application has the users refresh token already?
   print(pref.getString("refresh_token") != null
-      ? "refresh token:\t🟢" // YES
-      : "refresh token:\t🔴"); // NO
+      ? "refresh token:\t🟢" /// YES
+      : "refresh token:\t🔴"); /// NO
   // the applcation has a current access token?
   print(pref.getString("access_token") != null
-      ? "access token:\t🟢" // YES
-      : "access token:\t🔴"); // NO
+      ? "access token:\t🟢" /// YES
+      : "access token:\t🔴"); /// NO
   // the application has a current expired_in date?
   print(pref.getInt("expires_in") != null
       ? "expires in:\t🟢" // YES
       : "expires in:\t🔴"); // NO
+  print(pref.getInt("user_id") != null
+      ? "user_id:\t🟢" // YES
+      : "user_id:\t🔴"); // NO
   // Print the answer to the console and return to LoadScreen()
   if (pref.getString("refresh_token") == null ||
       pref.getString("access_token") == null ||
@@ -90,11 +98,11 @@ Future<bool> checkLocalProfileData() async {
 }
 
 Future<bool> getNewCredentials() async {
-  //####################################
-  //    refresh the local values in my phone
-  //   the application must use the current refresh_token
-  //   and generate a new refresh_token, access_token and
-  //   expiration_date each time you log into the application.
+  ///####################################
+  ///    refresh the local values in my phone
+  ///   the application must use the current refresh_token
+  ///   and generate a new refresh_token, access_token and
+  ///   expiration_date each time you log into the application.
 
   SharedPreferences pref = await SharedPreferences.getInstance();
   // make a call to the user auth token api, to refresh the data
@@ -109,11 +117,11 @@ Future<bool> getNewCredentials() async {
     'refresh_token': pref.getString("refresh_token"),
   });
   if (response.statusCode == 200) {
-    //############################
-    //  decode the information to
-    //  allow my application to
-    //  parse it into the applications
-    //  SharePreferences (local storage).
+    ///############################
+    ///  decode the information to
+    ///  allow my application to
+    ///  parse it into the applications
+    ///  SharePreferences (local storage).
     final jsonResponse = json.decode(response.body);
     pref.setString('access_token', "Bearer ${jsonResponse['access_token']}");
     pref.setString('refresh_token', jsonResponse['refresh_token']);
@@ -127,11 +135,15 @@ Future<bool> getNewCredentials() async {
 }
 
 class Scene extends StatefulWidget {
+  Scene(this.currentPage);
+  final currentPage;
+
   @override
-  _SceneState createState() => _SceneState();
+  _SceneState createState() => _SceneState(currentPage);
 }
 
 class _SceneState extends State<Scene> {
+  _SceneState(this._currentIndex);
   int _currentIndex = 0;
 
   var _page = {
@@ -143,11 +155,11 @@ class _SceneState extends State<Scene> {
 
   @override
   Widget build(BuildContext context) {
-    //####################################
-    //   this is a scene that is used for
-    //   every page. this builds the
-    //   applications bottomNav that calls
-    //   each page once it is pressed.
+    ///####################################
+    ///   this is a scene that is used for
+    ///   every page. this builds the
+    ///   applications bottomNav that calls
+    ///   each page once it is pressed.
 
     return Scaffold(
       appBar: buildAppBar(context, _currentIndex),
@@ -198,10 +210,10 @@ class _SceneState extends State<Scene> {
   }
 
   AppBar buildAppBar(BuildContext context, int currentIndex) {
-    //########################################################
-    //   the application needs a new appbar for each page,
-    //   in this way I can update it via the current index
-    //   of the bottom nav using a switch. and case.
+    ///########################################################
+    ///   the application needs a new appbar for each page,
+    ///   in this way I can update it via the current index
+    ///   of the bottom nav using a switch. and case.
     var _items = {1: ProfilePage(), 2: ProfilePage()};
     const int fontSize = 18;
     switch (currentIndex) {
@@ -241,10 +253,11 @@ class _SceneState extends State<Scene> {
             IconButton(
               icon: Icon(Icons.add_circle),
               onPressed: () {
-                setState(() {});
+                Navigator.push(context, MaterialPageRoute(builder: (context) => CreateDiscussion()));
               },
               color: Colors.white,
               iconSize: 40,
+              
             ),
           ],
         );
@@ -278,7 +291,7 @@ class _SceneState extends State<Scene> {
                 () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => _items[index]),
+                    MaterialPageRoute(builder: (context) => SignIn()),
                   );
                 },
               )

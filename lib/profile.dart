@@ -3,13 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'main.dart';
 
 TextEditingController searchController = new TextEditingController();
 
 class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return buildMaterial(child: Scaffold(
       appBar: AppBar(),
       body: FutureBuilder<User>(
         future: getUser(),
@@ -38,7 +39,7 @@ class ProfilePage extends StatelessWidget {
          }
         },
       ),
-    );
+    ),);
   }
 }
 
@@ -53,19 +54,16 @@ Future<User> getUser() async {
     },
   );
   final jsonRequest = json.decode(request.body);
-  print("name: ${jsonRequest['first_name']} ${jsonRequest['last_name']}");
-  print("name: ${jsonRequest['name']}");
-  print("name: ${jsonRequest['email']}");
   print(request.statusCode);
-  return new User(firstName: jsonRequest['first_name'], lastName: jsonRequest['last_name'], email: jsonRequest['email'], username: jsonRequest['name']);
+  return new User(firstName: jsonRequest['first_name'], lastName: jsonRequest['last_name'], email: jsonRequest['email'], username: jsonRequest['name'],id: jsonRequest['id']);
 }
 
 class User {
-  String firstName, lastName, username, email;
-  User({String firstName, String lastName, String username, String email}) {
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.username = username;
-    this.email = email;
-  }
+  User({ this.firstName, this.lastName, this.username, this.email, this.id});
+     final String firstName,
+     lastName,
+     username,
+     email;
+    final id;
+  
 }

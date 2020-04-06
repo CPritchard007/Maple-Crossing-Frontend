@@ -8,8 +8,8 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 class InformationPage extends StatefulWidget {
-//############################################
-//
+///############################################
+///
   static TextEditingController controller = new TextEditingController();
   @override
   _InformationPageState createState() => _InformationPageState();
@@ -27,37 +27,37 @@ class _InformationPageState extends State<InformationPage> {
 
   @override
   Widget build(BuildContext context) {
-    //#################################
-    //    I am using FutureBuilder once
-    //    when the application starts.
-    //    the page will store its information
-    //    until the user leaves the page.
+    ///#################################
+    ///    I am using FutureBuilder once
+    ///    when the application starts.
+    ///    the page will store its information
+    ///    until the user leaves the page.
     return FutureBuilder(
       future: _future,
       builder: (context, snapshot) {
-        //if the application successfully pulled data in from the api
+        ///if the application successfully pulled data in from the api
         if (snapshot.hasData) {
-          // create a listView, this list view will allow you to build each individual item
+          /// create a listView, this list view will allow you to build each individual item
           return ListView.builder(
             itemBuilder: (context, position) {
-              // this is the reference of one resource in the list
+              /// this is the reference of one resource in the list
               Card item = snapshot.data[position];
               return new Slidable(
-                // controllers allow the user to store the current status of the Widget (Slidable), allowing me  to
-                // manipulate it manually.
+                /// controllers allow the user to store the current status of the Widget (Slidable), allowing me  to
+                /// manipulate it manually.
                 controller: _controller,
-                // how far will the slider extend to..
+                /// how far will the slider extend to..
                 actionExtentRatio: 0.25,
                 child: item,
                 delegate: SlidableDrawerDelegate(),
-                // the slider allows you to effect [actions] and [secondaryActions] parameters. this disctates wether you want to effect
-                // the left or the right side of the item as a slider. as used in this application, it is to be slid left
+                /// the slider allows you to effect [actions] and [secondaryActions] parameters. this disctates wether you want to effect
+                /// the left or the right side of the item as a slider. as used in this application, it is to be slid left
                 secondaryActions: <Widget>[
-                  //Create the 2 actions you can use on sliding
+                  ///Create the 2 actions you can use on sliding
                   SlideAction(
                     child: Column(
                       children: <Widget>[
-                        // DELETE
+                        /// DELETE
                         Expanded(
                           child: Container(
                             color: Color.fromRGBO(254, 95, 95, 1),
@@ -69,7 +69,7 @@ class _InformationPageState extends State<InformationPage> {
                                 ),
                                 iconSize: 60,
                                 onPressed: () {
-                                  //on pressed alert the user that a resource is being deleted
+                                  ///on pressed alert the user that a resource is being deleted
                                   Scaffold.of(context)
                                       .showSnackBar(new SnackBar(
                                     content: Text('pressed'),
@@ -81,7 +81,7 @@ class _InformationPageState extends State<InformationPage> {
                             ),
                           ),
                         ),
-                        // EDIT
+                        /// EDIT
                         Expanded(
                           child: Container(
                             color: Color.fromRGBO(130, 188, 218, 1),
@@ -93,7 +93,7 @@ class _InformationPageState extends State<InformationPage> {
                                 ),
                                 iconSize: 60,
                                 onPressed: () {
-                                  //on pressed, alert the user that the information is being saved
+                                  ///on pressed, alert the user that the information is being saved
                                   Scaffold.of(context)
                                       .showSnackBar(new SnackBar(
                                     content: Text('pressed'),
@@ -125,21 +125,21 @@ class _InformationPageState extends State<InformationPage> {
 }
 
 Future<List<Card>> getAllResources() async {
-  //########################################
-  //  this is the primary function that pulls 
-  //  for resource data. once the application
-  //  has reached over 30 individual resources
-  //  it will need to pull a new page of api's.
+  ///########################################
+  ///  this is the primary function that pulls 
+  ///  for resource data. once the application
+  ///  has reached over 30 individual resources
+  ///  it will need to pull a new page of api's.
 
-  //get a connection to the local storage
+  ///get a connection to the local storage
   final SharedPreferences pref = await SharedPreferences.getInstance();
 
-  // get api responses for the resources page
+  /// get api responses for the resources page
   final response = await http.get(
     "https://cpritchar.scweb.ca/mapleCrossing/api/resource",
     headers: {
       HttpHeaders.acceptHeader: "application/json",
-      //  get the users access token they recieved from logging into the application.
+      ///  get the users access token they recieved from logging into the application.
       HttpHeaders.authorizationHeader: pref.getString("access_token"),
     },
   );
@@ -158,7 +158,7 @@ Future<List<Card>> getAllResources() async {
           favourite: false,
           id: resource['id']));
     }
-    // using that list of resources, pass the information on the the builder, and create a list of functioning resource cards
+    /// using that list of resources, pass the information on the the builder, and create a list of functioning resource cards
     final gestureList = buildResources(resources);
     return gestureList;
   } else {
@@ -169,12 +169,12 @@ Future<List<Card>> getAllResources() async {
 }
 
 buildResources(List<Resource> resources) {
-  //bulld resource cards
+  ///bulld resource cards
   List<Card> resourcesList = new List<Card>();
   for (final resource in resources) {
     resourcesList.add(
       new Card(
-        //allow the listview to match each resource by "Resource #id"
+        ///allow the listview to match each resource by "Resource #id"
         key: Key("resource ${resource.id}"),
         child: Container(
           padding: EdgeInsets.all(15.0),
@@ -217,7 +217,7 @@ buildResources(List<Resource> resources) {
 }
 
 class SideMenu extends StatefulWidget {
-// find more informaiton at _SideMenuState
+/// find more informaiton at _SideMenuState
   SideMenu({this.resource});
   final Resource resource;
 
@@ -226,18 +226,18 @@ class SideMenu extends StatefulWidget {
 }
 
 class _SideMenuState extends State<SideMenu> {
-  //##########################################
-  //                SideMenu
-  //    this builds up the two side items that
-  //    allow the user to favourite an item, as
-  //    as well as adding a, icon to show that
-  //    the user can interact with the menu by
-  //    dragging. this will not be displayed if
-  //    the iser does not have the ability to 
-  //    remove resources.
-  //    
+  ///##########################################
+  ///                SideMenu
+  ///    this builds up the two side items that
+  ///    allow the user to favourite an item, as
+  ///    as well as adding a, icon to show that
+  ///    the user can interact with the menu by
+  ///    dragging. this will not be displayed if
+  ///    the iser does not have the ability to 
+  ///    remove resources.
+  ///    
   _SideMenuState(this.resource);
-  //store the current resource for each list item
+  ///store the current resource for each list item
   Resource resource;
   @override
   Widget build(BuildContext context) {
@@ -259,12 +259,12 @@ class _SideMenuState extends State<SideMenu> {
             ),
           ),
           IconButton(
-            //if the user has favourited this item already, the item will be removed, or the opposite
+            ///if the user has favourited this item already, the item will be removed, or the opposite 
             icon: Icon(resource.favourite ? Icons.star : Icons.star_border),
             onPressed: () {
               setState(
                 () {
-                  // remind the user that the item has been added/removed from your favourites
+                  /// remind the user that the item has been added/removed from your favourites
                   print(resource.favourite);
                   resource.favourite = !resource.favourite;
                   Scaffold.of(context).showSnackBar(new SnackBar(

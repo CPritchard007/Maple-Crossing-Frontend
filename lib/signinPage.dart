@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:maple_crossing_application/profile.dart';
+
 import 'Const.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -25,13 +27,13 @@ Future<bool> fetchProfile(String user, String pass) async {
   if (response.statusCode == 200) {
     SharedPreferences pref = await SharedPreferences.getInstance();
     final responseJson = json.decode(response.body);
-
+    User user = await getUser();
     pref.setString('access_token',
         "${responseJson['token_type']} ${responseJson['access_token']}");
     pref.setString('refresh_token',
         "${responseJson['refresh_token']}");
     pref.setInt("expires_in", responseJson['expires_in']);
-
+    pref.setInt("user_id", user.id);
     return true;
   } else {
     print('status code ${response.statusCode}: {\n' +
@@ -51,9 +53,7 @@ class SignIn extends StatelessWidget {
 }
 
   MaterialApp buildSignInPage() {
-    return MaterialApp(
-      theme: ThemeData(primaryColor: Color.fromRGBO(254, 95, 95, 1)),
-      home: Scaffold(
+    return buildMaterial(child: Scaffold(
         appBar: AppBar(
           title: Text("Sign In"),
         ),

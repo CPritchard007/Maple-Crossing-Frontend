@@ -12,7 +12,7 @@ var _apis = {
   "DWBridge": ""
 };
 
-//  converts exchange rate json to an object
+///  converts exchange rate json to an object
 class ExchangeRate {
   final double dollar;
   ExchangeRate({this.dollar});
@@ -23,30 +23,30 @@ class ExchangeRate {
   }
 }
 
-// awaits the recieving of json data to the application
+/// awaits the recieving of json data to the application
 Future<ExchangeRate> fetchExchange(String request) async {
   final response = await http.get(request);
 
   if (response.statusCode == 200) {
-    // If the server did return a 200 response,
-    // then parse the JSON.
+    /// If the server did return a 200 response,
+    /// then parse the JSON.
     return ExchangeRate.fromJson(json.decode(response.body));
   } else {
-    // If the server recieves another response,
-    // then throw an exception.
+    /// If the server recieves another response,
+    /// then throw an exception.
     print('failed to load data');
     return null;
   }
 }
 
-// awaits json data from the tunnel api
+/// awaits json data from the tunnel api
 class Tunnel {
   final int minutesTo;
   final int minutesFrom;
   final int lanesTo;
   final int lanesFrom;
   Tunnel({this.minutesTo, this.minutesFrom, this.lanesTo, this.lanesFrom});
-  //save json data as tunnel object
+  ///save json data as tunnel object
   factory Tunnel.fromJson(json) {
     return Tunnel(
       minutesTo: int.parse((json[0]['DetailsTravelTime']).substring(2)),
@@ -57,17 +57,17 @@ class Tunnel {
   }
 }
 
-//call for the retrieval of json data
+///call for the retrieval of json data
 Future<Tunnel> fetchTunnel(String request) async {
   final response = await http.get(request);
 
   if (response.statusCode == 200) {
-    // If the server did return a 200 response,
-    // then parse the JSON.
+    /// If the server did return a 200 response,
+    /// then parse the JSON.
     return Tunnel.fromJson(json.decode(response.body));
   } else {
-    // If the server recieves another response,
-    // then throw an exception.
+    /// If the server recieves another response,
+    /// then throw an exception.
     print("unexpected");
     return null;
   }
@@ -78,14 +78,14 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        //     USD/CAD Exchange rate              $*.**
+        ///     USD/CAD Exchange rate              $*.**
         ExchangeBar(),
         Row(
           children: <Widget>[
             Text("Border Wait Time", style: Theme.of(context).textTheme.title)
           ],
         ),
-        //    displays the wait time of the ambasador bridge and Detroit tunnel
+        ///    displays the wait time of the ambasador bridge and Detroit tunnel
         WaitTime(),
 
         Row(
@@ -93,7 +93,7 @@ class HomePage extends StatelessWidget {
             Text("Traffic", style: Theme.of(context).textTheme.title)
           ],
         ),
-        //displays the traffic maps of the users location
+        ///displays the traffic maps of the users location
         GoogleMaps()
       ],
     );
@@ -110,13 +110,13 @@ class _ExchangeBarState extends State<ExchangeBar> {
   @override
   void initState() {
     super.initState();
-    //before the widget starts, fetch the exchange data from the api
+    ///before the widget starts, fetch the exchange data from the api
     exchange = fetchExchange(_apis["Exchange"]);
   }
 
   @override
   Widget build(BuildContext context) {
-    //create the exchange rate banner at the top of the application
+    ///create the exchange rate banner at the top of the application
     return Container(
       color: Colors.yellow,
       height: 25,

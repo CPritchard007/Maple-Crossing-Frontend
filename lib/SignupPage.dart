@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:maple_crossing_application/signinPage.dart';
 import 'package:http/http.dart' as http;
 
+import 'main.dart';
+
 class Signup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(primaryColor: Color.fromRGBO(254, 95, 95, 1)),
-      home: Scaffold(
+    return buildMaterial(child: Scaffold(
         appBar: AppBar(
           title: Text("Sign up"),
           backgroundColor: Color.fromRGBO(254, 95, 95, 1),

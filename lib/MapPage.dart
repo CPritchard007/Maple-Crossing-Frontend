@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/services.dart' show rootBundle;
-
+import 'main.dart';
 class MapPage extends StatefulWidget {
 
   @override
@@ -30,11 +30,7 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        primaryColor: Color.fromRGBO(254, 95, 95, 1)
-      ),
-      home: Scaffold(
+    return buildMaterial(child: Scaffold(
         body: Stack(children: <Widget>[ GoogleMap(
               trafficEnabled: _trafficEnabled,
               onMapCreated: _onMapCreated,

@@ -7,11 +7,13 @@ import 'package:http/http.dart' as http;
 import 'package:maple_crossing_application/profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'main.dart';
+
 class DiscussionContentPage extends StatelessWidget {
-  //#################################################
-  //       This is the starting location of the
-  //       full discussion page.
-  //
+  ///#################################################
+  ///       This is the starting location of the
+  ///       full discussion page.
+  ///
 
   final String question;
   final List<String> tags;
@@ -24,12 +26,12 @@ class DiscussionContentPage extends StatelessWidget {
     4: [126, 108, 167],
     5: [38, 70, 53]
   };
-  // information passed on from the applications discussion page
+  /// information passed on from the applications discussion page
   DiscussionContentPage({this.id, this.question, this.tags});
 
   @override
   Widget build(BuildContext context) {
-    // list of tags that will be used on the head of the page
+    /// list of tags that will be used on the head of the page
     List<Container> tagList = List<Container>();
     Random ran = new Random(colors.length);
 
@@ -51,9 +53,7 @@ class DiscussionContentPage extends StatelessWidget {
       );
     }
 
-    return MaterialApp(
-      theme: ThemeData(primaryColor: Color.fromRGBO(254, 95, 95, 1)),
-      home: Scaffold(
+    return buildMaterial(child: Scaffold(
         floatingActionButton: FloatingActionButton(child: Icon(Icons.add, size: 40), backgroundColor: Color.fromRGBO(254, 95, 95, 1),
         onPressed: (){
           setState(){
