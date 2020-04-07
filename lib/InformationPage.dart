@@ -323,55 +323,61 @@ class _CreateInformationState extends State<CreateInformation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Scaffold(
-        backgroundColor: Theme.of(context).primaryColor.withAlpha(180),
-        appBar: AppBar(
-          title: Text('Create Resource'),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
+            backgroundColor: Color.fromRGBO(240, 240, 240, 1),
+
+      appBar: AppBar(
+        title: Text('Create Resource'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
-        body: Container(
-          margin: EdgeInsets.fromLTRB(10, 40, 10, 40),
-          padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-          decoration: BoxDecoration(
-              color: Colors.white,
-              border:
-                  Border.all(color: Color.fromRGBO(200, 95, 95, 1), width: 2),
-              borderRadius: BorderRadius.circular(20)),
-          child: Form(
-            child: Container(
-              padding: EdgeInsets.all(10),
-              child: ListView(
-                shrinkWrap: true,
-                children: <Widget>[
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Container(
-                        width: 220,
-                        child: TextFormField(decoration: InputDecoration(labelText: "title"),
-                        controller: titleController,),
+      ),
+      body: Container(
+        margin: EdgeInsets.fromLTRB(10, 40, 10, 40),
+        padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(20)),
+        child: Form(
+          child: Container(
+            padding: EdgeInsets.all(10),
+            child: ListView(
+              shrinkWrap: true,
+              children: <Widget>[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      width: 220,
+                      child: TextFormField(
+                        decoration: InputDecoration(labelText: "title"),
+                        controller: titleController,
                       ),
-                      TextFormField(decoration: InputDecoration(labelText: "content"),maxLength: 400, maxLines: null,
-                      controller: contentController,),
-                      IconButton(
-                    icon: Icon(Icons.send),
-                    alignment: Alignment.centerRight,
-                    onPressed: () {
-                      submitResources(title: titleController.value.text, content: contentController.value.text);
-                      setState(() {
-                        Navigator.pop(context);
-                      });
-                    },
-                  ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                    TextFormField(
+                      decoration: InputDecoration(labelText: "content"),
+                      maxLength: 400,
+                      maxLines: null,
+                      controller: contentController,
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.send),
+                      alignment: Alignment.centerRight,
+                      onPressed: () {
+                        submitResources(
+                            title: titleController.value.text,
+                            content: contentController.value.text);
+                        setState(() {
+                          Navigator.pop(context);
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
@@ -380,24 +386,19 @@ class _CreateInformationState extends State<CreateInformation> {
   }
 }
 
-
 Future<void> submitResources({String title, content}) async {
-  
   final SharedPreferences pref = await SharedPreferences.getInstance();
-  final response = await http.post("https://cpritchar.scweb.ca/mapleCrossing/api/resource",
-  headers: {
+  final response = await http
+      .post("https://cpritchar.scweb.ca/mapleCrossing/api/resource", headers: {
     HttpHeaders.acceptHeader: "application/json",
     HttpHeaders.authorizationHeader: pref.getString("access_token")
-  },
-  body: {
+  }, body: {
     "title": title,
     "content": content,
     "user_id": "${pref.getInt("user_id")}"
   });
   print(pref.getString("access_token"));
-  if (response.statusCode == 200){
+  if (response.statusCode == 200) {
     print("successfull");
-  } else {
-
-  }
+  } else {}
 }

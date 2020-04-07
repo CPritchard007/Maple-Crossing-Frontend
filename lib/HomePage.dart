@@ -80,18 +80,24 @@ class HomePage extends StatelessWidget {
       children: <Widget>[
         ///     USD/CAD Exchange rate              $*.**
         ExchangeBar(),
-        Row(
-          children: <Widget>[
-            Text("Border Wait Time", style: Theme.of(context).textTheme.title)
-          ],
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0,8,0,0),
+          child: Row(
+            children: <Widget>[
+              Text("Border Wait Time", style: Theme.of(context).textTheme.title)
+            ],
+          ),
         ),
         ///    displays the wait time of the ambasador bridge and Detroit tunnel
         WaitTime(),
 
-        Row(
-          children: <Widget>[
-            Text("Traffic", style: Theme.of(context).textTheme.title)
-          ],
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0,8,0,0),
+          child: Row(
+            children: <Widget>[
+              Text("Traffic", style: Theme.of(context).textTheme.title)
+            ],
+          ),
         ),
         ///displays the traffic maps of the users location
         GoogleMaps()
@@ -122,11 +128,12 @@ class _ExchangeBarState extends State<ExchangeBar> {
       height: 25,
       child: Row(
         children: <Widget>[
-          Expanded(
+          Container(
+            padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
               child: Align(
             child: Text(
               "USD/CAD Exchange Rate:",
-              style: Theme.of(context).textTheme.subtitle,
+              style: Theme.of(context).textTheme.caption,
             ),
             alignment: Alignment.centerLeft,
           )),
@@ -136,10 +143,14 @@ class _ExchangeBarState extends State<ExchangeBar> {
               future: exchange,
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return Text("\$${snapshot.data.dollar.toStringAsFixed(2)}");
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(0,0,10,0),
+                    child: Text("\$${snapshot.data.dollar.toStringAsFixed(2)}", style: Theme.of(context).textTheme.body1,),
+                  );
                 } else {
                   return Text(
                     "|",
+                    style: Theme.of(context).textTheme.body1,
                   );
                 }
               },
@@ -190,14 +201,14 @@ class _WaitTimeState extends State<WaitTime> {
                           Align(
                             child: Text(
                               "${snapshot.data.minutesTo.toString()} Min",
-                              style: Theme.of(context).textTheme.display3,
+                              style: Theme.of(context).textTheme.display1,
                             ),
                             alignment: Alignment.centerLeft,
                           ),
                           Align(
                             child: Text(
                               "${snapshot.data.lanesTo} Lanes",
-                              style: Theme.of(context).textTheme.display2,
+                              style: Theme.of(context).textTheme.headline,
                             ),
                             alignment: Alignment.centerLeft,
                           ),
@@ -205,7 +216,7 @@ class _WaitTimeState extends State<WaitTime> {
                               child: Align(
                             child: Text(
                               "Detroit Tunnel",
-                              style: Theme.of(context).textTheme.display1,
+                              style: Theme.of(context).textTheme.subhead,
                             ),
                             alignment: Alignment.bottomLeft,
                           ))
@@ -217,14 +228,14 @@ class _WaitTimeState extends State<WaitTime> {
                           Align(
                             child: Text(
                               "- Min",
-                              style: Theme.of(context).textTheme.display3,
+                              style: Theme.of(context).textTheme.display1,
                             ),
                             alignment: Alignment.centerLeft,
                           ),
                           Align(
                             child: Text(
                               "- Lanes",
-                              style: Theme.of(context).textTheme.display2,
+                              style: Theme.of(context).textTheme.headline,
                             ),
                             alignment: Alignment.centerLeft,
                           ),
@@ -232,7 +243,7 @@ class _WaitTimeState extends State<WaitTime> {
                               child: Align(
                             child: Text(
                               "Detroit Tunnel",
-                              style: Theme.of(context).textTheme.display1,
+                              style: Theme.of(context).textTheme.subhead,
                             ),
                             alignment: Alignment.bottomLeft,
                           ))
@@ -251,14 +262,14 @@ class _WaitTimeState extends State<WaitTime> {
                 Align(
                   child: Text(
                     "$side_2 Min",
-                    style: Theme.of(context).textTheme.display3,
+                    style: Theme.of(context).textTheme.display1,
                   ),
                   alignment: Alignment.centerLeft,
                 ),
                 Align(
                   child: Text(
                     "$lanes_2 Lanes",
-                    style: Theme.of(context).textTheme.display2,
+                    style: Theme.of(context).textTheme.headline,
                   ),
                   alignment: Alignment.centerLeft,
                 ),
@@ -266,7 +277,7 @@ class _WaitTimeState extends State<WaitTime> {
                     child: Align(
                   child: Text(
                     "Ambassador Bridge",
-                    style: Theme.of(context).textTheme.display1,
+                    style: Theme.of(context).textTheme.subhead,
                   ),
                   alignment: Alignment.bottomLeft,
                 )),

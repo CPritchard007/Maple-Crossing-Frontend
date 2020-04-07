@@ -243,6 +243,7 @@ Future<List<GestureDetector>> getAvailableDiscussions(
           );
         },
         child: buildCards(
+          context: context,
           username: user.username,
           question: discussion.question,
           tags: discussion.tags,
@@ -315,7 +316,7 @@ Future<User> getUserByID({int userId, final token}) async {
   }
 }
 
-Card buildCards({String username, String question, List<String> tags}) {
+Card buildCards({String username, String question, List<String> tags, BuildContext context}) {
   ///####################################################################
   /// Building the Discussion cards that will populate the discussions  #
   ///                                                                   #
@@ -339,7 +340,7 @@ Card buildCards({String username, String question, List<String> tags}) {
         margin: EdgeInsets.fromLTRB(5, 0, 5, 5),
         child: Text(
           tag,
-          style: TextStyle(color: Colors.black),
+          style: Theme.of(context).textTheme.button,
         ),
         padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
         decoration: BoxDecoration(
@@ -362,7 +363,7 @@ Card buildCards({String username, String question, List<String> tags}) {
               style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey),
+                  color: Color.fromRGBO(0, 0, 0, .3),),
             ),
           ),
           Align(

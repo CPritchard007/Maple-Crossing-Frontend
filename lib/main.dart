@@ -56,13 +56,32 @@ Widget buildMaterial({Widget child}){
       theme: ThemeData(
           backgroundColor: Color.fromRGBO(240, 240, 240, 1),
           primaryColor: Color.fromRGBO(254, 95, 95, 1),
+          fontFamily: 'Verdana',
           textTheme: TextTheme(
-              display3: TextStyle(fontSize: 52, fontWeight: FontWeight.w800),
-              display2: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
-              display1: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                  color: Color.fromRGBO(0, 0, 0, 0.3)))),
+            display1: TextStyle(
+              fontWeight: FontWeight.w900,
+              color: Colors.black.withAlpha(150)
+            ),
+            headline: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.black.withAlpha(130)
+            ),
+            subhead: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.black.withAlpha(130),
+            ),
+            title: TextStyle(
+              fontWeight: FontWeight.w600
+            ),
+            caption: TextStyle(
+              fontWeight: FontWeight.w600
+            ),
+            body1: TextStyle(
+              
+            ),
+            button: TextStyle(color: Colors.black,
+            )
+          )),
       home: child
     );
 }
@@ -274,7 +293,7 @@ class _SceneState extends State<Scene> {
       default:
         return AppBar(
           title: Text("Maple Crossing",
-              style: Theme.of(context).textTheme.headline),
+              style: Theme.of(context).textTheme.title),
           leading: PopupMenuButton<int>(
             child: Icon(
               Icons.person,

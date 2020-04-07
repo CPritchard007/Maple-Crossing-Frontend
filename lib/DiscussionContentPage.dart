@@ -273,7 +273,7 @@ class _CreateCommentState extends State<CreateComment> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor.withAlpha(180),
+            backgroundColor: Color.fromRGBO(240, 240, 240, 1),
       appBar: AppBar(
         title: Text('Create Comment'),
         leading: IconButton(
@@ -288,7 +288,7 @@ class _CreateCommentState extends State<CreateComment> {
         padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
         decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(color: Color.fromRGBO(200, 95, 95, 1), width: 2),
+            border: Border.all(color: Colors.grey, width: 2),
             borderRadius: BorderRadius.circular(20)),
         child: Form(
           child: ListView(
@@ -331,3 +331,4 @@ Future<void> submitComment({String comment, int discussionId}) async {
     print(response.statusCode);
   }
 }
+

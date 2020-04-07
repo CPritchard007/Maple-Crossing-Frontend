@@ -63,6 +63,15 @@ flutter:
     - assets/icons/trash.png
     - assets/icons/penTool.png
     - assets/styling/MapStyle.txt
+  
+  fonts:
+    - family: Verdana
+      fonts: 
+        - asset: assets/fonts/Verdana.ttf
+        - asset: assets/fonts/Verdana Bold.ttf
+          weight: 500
+        - asset: assets/fonts/Verdana Bold.ttf
+          weight: 300
 
     
   # An image asset can refer to one or more resolution-specific "variants", see
