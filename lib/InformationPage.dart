@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:maple_crossing_application/DiscussionPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -16,13 +17,27 @@ class InformationPage extends StatefulWidget {
 }
 
 class _InformationPageState extends State<InformationPage> {
-  Future<List<Card>> _future;
+  Future<List<Resource>> _future;
   SlidableController _controller;
-
+  List<Resource> currentItems = new List<Resource>();
+  ScrollController _scrollController = new ScrollController();
+  int page = 1;
   @override
   void initState() {
     super.initState();
-    _future = getAllResources();
+    _future = getAllResources(page: page);
+
+    _scrollController.addListener((){
+
+        if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent){
+          print("owww owww owwww");
+
+          page++;
+          getAllResources(page: page).then((val)=>
+            currentItems.addAll(val)
+          );
+        }
+    });
   }
 
   @override
@@ -41,7 +56,7 @@ class _InformationPageState extends State<InformationPage> {
           return ListView.builder(
             itemBuilder: (context, position) {
               /// this is the reference of one resource in the list
-              Card item = snapshot.data[position];
+              Resource resource = snapshot.data[position];
               return new Slidable(
                 /// controllers allow the user to store the current status of the Widget (Slidable), allowing me  to
                 /// manipulate it manually.
@@ -49,7 +64,8 @@ class _InformationPageState extends State<InformationPage> {
 
                 /// how far will the slider extend to..
                 actionExtentRatio: 0.25,
-                child: item,
+                child:  buildResources(resource),
+
                 delegate: SlidableDrawerDelegate(),
 
                 /// the slider allows you to effect [actions] and [secondaryActions] parameters. this disctates wether you want to effect
@@ -71,13 +87,11 @@ class _InformationPageState extends State<InformationPage> {
                                 ),
                                 iconSize: 60,
                                 onPressed: () {
-                                  ///on pressed alert the user that a resource is being deleted
+                                  deleteResource(resource.id);
                                   Scaffold.of(context).showSnackBar(
-                                    new SnackBar(
-                                      content: Text('pressed'),
-                                      duration: Duration(seconds: 5),
-                                    ),
-                                  );
+                                    SnackBar(
+                                      content: Text("the resource has been deleted"),
+                                      duration: Duration(seconds: 6),),);
                                 },
                               ),
                             ),
@@ -127,7 +141,22 @@ class _InformationPageState extends State<InformationPage> {
   }
 }
 
-Future<List<Card>> getAllResources() async {
+deleteResource(final int resource) async {
+  SharedPreferences pref = await SharedPreferences.getInstance();
+  final response = await http.delete(
+      "https://cpritchar.scweb.ca/mapleCrossing/api/resource/${resource}", headers: {
+        HttpHeaders.acceptHeader: "application/json",
+        HttpHeaders.authorizationHeader: pref.getString("access_token"),
+      });
+
+  if (response.statusCode == 200){
+    print("the item has been deleted");
+  }else{
+    print("error ${response.statusCode}");
+  }
+}
+
+Future<List<Resource>> getAllResources({int page}) async {
   ///########################################
   ///  this is the primary function that pulls
   ///  for resource data. once the application
@@ -139,7 +168,7 @@ Future<List<Card>> getAllResources() async {
 
   /// get api responses for the resources page
   final response = await http.get(
-    "https://cpritchar.scweb.ca/mapleCrossing/api/resource",
+    "https://cpritchar.scweb.ca/mapleCrossing/api/resource?page=$page",
     headers: {
       HttpHeaders.acceptHeader: "application/json",
 
@@ -164,8 +193,9 @@ Future<List<Card>> getAllResources() async {
     }
 
     /// using that list of resources, pass the information on the the builder, and create a list of functioning resource cards
-    final gestureList = buildResources(resources);
-    return gestureList;
+    
+    print("returning $resources");
+    return resources;
   } else {
     //the application has come back with an error
     print(
@@ -173,12 +203,9 @@ Future<List<Card>> getAllResources() async {
   }
 }
 
-buildResources(List<Resource> resources) {
+buildResources(Resource resource) {
   ///bulld resource cards
-  List<Card> resourcesList = new List<Card>();
-  for (final resource in resources) {
-    resourcesList.add(
-      new Card(
+   Card resourceItem = new Card(
         ///allow the listview to match each resource by "Resource #id"
         key: Key("resource ${resource.id}"),
         child: Container(
@@ -215,10 +242,8 @@ buildResources(List<Resource> resources) {
             ],
           ),
         ),
-      ),
     );
-  }
-  return resourcesList;
+    return resourceItem;
 }
 
 class SideMenu extends StatefulWidget {
@@ -323,8 +348,7 @@ class _CreateInformationState extends State<CreateInformation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            backgroundColor: Color.fromRGBO(240, 240, 240, 1),
-
+      backgroundColor: Color.fromRGBO(240, 240, 240, 1),
       appBar: AppBar(
         title: Text('Create Resource'),
         leading: IconButton(

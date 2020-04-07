@@ -29,55 +29,56 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: Color.fromRGBO(240, 240, 240, 1),
       appBar: AppBar(
-        actions: !isEditing? <Widget>[
-          GestureDetector(
-            onTap: (){
-              isEditing = true;
-              setState(() {
-                
-              });
-            },
-            child: Container(
-              padding: EdgeInsets.fromLTRB(8, 8, 8, 5),
-              alignment: Alignment.bottomLeft,
-              child: Text(
-                "Edit",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          )
-        ] : <Widget>[
-          GestureDetector(
-            onTap: (){
-              updateProfile(name: nameController.value.text, email: emailController.value.text, username: usernameController.value.text);
-            },
-            child: Container(
-              padding: EdgeInsets.fromLTRB(8, 8, 8, 5),
-              alignment: Alignment.bottomLeft,
-              child: Text(
-                "Save",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
-          GestureDetector(
-            onTap: (){
-              isEditing = false;
-              setState(() {
-                
-              });
-            },
-            child: Container(
-              padding: EdgeInsets.fromLTRB(8, 8, 8, 5),
-              alignment: Alignment.bottomLeft,
-              child: Text(
-                "Cancel",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          )
-        ]
-      ),
+          actions: !isEditing
+              ? <Widget>[
+                  GestureDetector(
+                    onTap: () {
+                      isEditing = true;
+                      setState(() {});
+                    },
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(8, 8, 8, 5),
+                      alignment: Alignment.bottomLeft,
+                      child: Text(
+                        "Edit",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  )
+                ]
+              : <Widget>[
+                  GestureDetector(
+                    onTap: () {
+                      updateProfile(
+                          name: nameController.value.text,
+                          email: emailController.value.text,
+                          username: usernameController.value.text);
+                          isEditing = false;
+                    },
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(8, 8, 8, 5),
+                      alignment: Alignment.bottomLeft,
+                      child: Text(
+                        "Save",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      isEditing = false;
+                      setState(() {});
+                    },
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(8, 8, 8, 5),
+                      alignment: Alignment.bottomLeft,
+                      child: Text(
+                        "Cancel",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  )
+                ]),
       body: FutureBuilder(
         future: getUser(),
         builder: (context, snapshot) {
@@ -114,11 +115,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                       Container(
-                        
                         padding: EdgeInsets.fromLTRB(8, 8, 8, 4),
                         decoration: BoxDecoration(
-                                                    borderRadius: BorderRadius.circular(5),
-
+                          borderRadius: BorderRadius.circular(5),
                           color: Color.fromRGBO(254, 95, 95, 1),
                           border: Border.all(
                             color: Color.fromRGBO(250, 250, 250, .3),
@@ -139,8 +138,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: <Widget>[
                       Container(
                         decoration: BoxDecoration(
-                                                    borderRadius: BorderRadius.circular(5),
-
+                          borderRadius: BorderRadius.circular(5),
                           color: Color.fromRGBO(254, 95, 95, 1),
                           border: Border.all(
                             color: Color.fromRGBO(250, 250, 250, .3),
@@ -156,8 +154,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       Container(
                         decoration: BoxDecoration(
-                                                    borderRadius: BorderRadius.circular(5),
-
+                          borderRadius: BorderRadius.circular(5),
                           color: Color.fromRGBO(254, 95, 95, 1),
                           border: Border.all(
                             color: Color.fromRGBO(250, 250, 250, .3),
@@ -179,7 +176,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: <Widget>[
                       Container(
                         decoration: BoxDecoration(
-                                                    borderRadius: BorderRadius.circular(5),
+                          borderRadius: BorderRadius.circular(5),
                           color: Color.fromRGBO(254, 95, 95, 1),
                           border: Border.all(
                             color: Color.fromRGBO(250, 250, 250, .3),
@@ -195,8 +192,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       Container(
                         decoration: BoxDecoration(
-                                                    borderRadius: BorderRadius.circular(5),
-
+                          borderRadius: BorderRadius.circular(5),
                           color: Color.fromRGBO(254, 95, 95, 1),
                           border: Border.all(
                             color: Color.fromRGBO(250, 250, 250, .3),
@@ -257,22 +253,24 @@ class User {
   final id;
 }
 
-
- updateProfile({String name,String username,String email}) async {
+updateProfile({String name, String username, String email}) async {
   SharedPreferences pref = await SharedPreferences.getInstance();
-  final response = await http.post("https://cpritchar.scweb.ca/mapleCrossing/api/user/${pref.getInt("user_id")}", headers: {
-    HttpHeaders.acceptHeader: "application/json",
-    HttpHeaders.authorizationHeader: pref.getString("access_token"),
-  },body: {
-    "name": username,
-    "first_name": name.split(" ")[0],
-    "last_name": name.split(" ")[1],
-    "email": email
-  });
+  final response = await http.post(
+      "https://cpritchar.scweb.ca/mapleCrossing/api/user/${pref.getInt("user_id")}",
+      headers: {
+        HttpHeaders.acceptHeader: "application/json",
+        HttpHeaders.authorizationHeader: pref.getString("access_token"),
+      },
+      body: {
+        "name": username,
+        "first_name": name.split(" ")[0],
+        "last_name": name.split(" ")[1],
+        "email": email
+      });
 
-  if (response.statusCode == 200){
+  if (response.statusCode == 200) {
     print("updated successfully");
-  }else{
+  } else {
     print("error ${response.statusCode}");
   }
 }

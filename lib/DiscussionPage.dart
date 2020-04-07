@@ -3,10 +3,10 @@ import 'dart:ffi';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:maple_crossing_application/DiscussionContentPage.dart';
 import 'package:maple_crossing_application/profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'DiscussionContentPage.dart';
 import 'main.dart';
 
 ///###########################################
@@ -19,38 +19,49 @@ class DiscussionPage extends StatefulWidget {
 }
 
 class _DiscussionPageState extends State<DiscussionPage> {
-  Future<List<GestureDetector>> _future;
+  Future<List<DiscussionItem>> _future;
+  ScrollController _scrollController = new ScrollController();
+  bool isLoading= false;
+  int page = 1;
+  List<DiscussionItem> currentItems = new List<DiscussionItem>();
   @override
   void initState() {
     super.initState();
-    _future = getAvailableDiscussions(context);
+    _future = getAvailableDiscussions(context, page: page);
+    _scrollController.addListener((){
+
+        if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent){
+          print("owww owww owwww");
+
+          isLoading = true;
+          page++;
+          getDiscussions(page).then((val)=>
+            currentItems.addAll(val)
+          );
+          isLoading = false;
+        }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureListView(future: _future);
-  }
-}
 
-class FutureListView extends StatelessWidget {
-  const FutureListView({
-    Key key,
-    @required Future<List<GestureDetector>> future,
-  })  : _future = future,
-        super(key: key);
-
-  final Future<List<GestureDetector>> _future;
-
-  @override
-  Widget build(BuildContext context) {
     return FutureBuilder(
       future: _future,
       builder: (context, snapshot) {
+        
         print("snapshot_hasData ${snapshot.hasData}");
         if (snapshot.hasData) {
-          return ListView(
-            children: snapshot.data,
-          );
+          
+          currentItems = snapshot.data;
+
+          return ListView.builder(itemBuilder: (context, position){
+              DiscussionItem item = currentItems[position];
+
+            return buildCard(item, context);
+          },
+          itemCount: currentItems.length,
+          controller: _scrollController,);
         } else {
           return Container(
             child: Center(
@@ -64,6 +75,7 @@ class FutureListView extends StatelessWidget {
     );
   }
 }
+
 
 ///Create
 class CreateDiscussion extends StatefulWidget {
@@ -207,61 +219,29 @@ class _CreateDiscussionState extends State<CreateDiscussion> {
   }
 }
 
-Future<List<GestureDetector>> getAvailableDiscussions(
-    BuildContext context) async {
+Future<List<DiscussionItem>> getAvailableDiscussions(
+    BuildContext context, {int page}) async {
   ///##################################################
   ///         Wait for discussion information
-  SharedPreferences pref = await SharedPreferences.getInstance();
-  final accessToken = pref.getString("access_token");
-
-  final discussions = await getDiscussions(accessToken);
-
-  final List<GestureDetector> cards = new List<GestureDetector>();
-
-  ///##################################################
-  ///##################################################
-  ///    For each discussion found in the appliation,
-  ///    display it as a card.
-  for (DiscussionItem discussion in discussions) {
-    // getUserByID(userId: discussion['user_id'], token: accessToken).then((value)=>  user = value.username );
-    //allow the discussion card to be clickable using a gesture detector
-    final user =
-        await getUserByID(userId: discussion.userId, token: accessToken);
-    print(discussion.tags);
-    cards.add(
-      GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DiscussionContentPage(
-                id: discussion.id,
-                question: discussion.question,
-                tags: discussion.tags,
-              ),
-            ),
-          );
-        },
-        child: buildCards(
-          context: context,
-          username: user.username,
-          question: discussion.question,
-          tags: discussion.tags,
-        ),
-      ),
-    );
+  
+  final discussions = await getDiscussions(page);
+  for(int pos = 0; pos < discussions.length; pos ++){
+    DiscussionItem item = discussions[pos];
+    User user = await getUserByID(userId: item.userId);
+    item.username = user.username;
   }
-  return cards;
+  return discussions;
 }
 
-Future<List<DiscussionItem>> getDiscussions(final token) async {
+Future<List<DiscussionItem>> getDiscussions(int page) async {
   ///############################################################
   ///          get informaiton from the discussions api
-
+  /// 
+  SharedPreferences pref = await SharedPreferences.getInstance();
   final response = await http
-      .get("https://cpritchar.scweb.ca/mapleCrossing/api/discussion", headers: {
+      .get("https://cpritchar.scweb.ca/mapleCrossing/api/discussion?page=${page}", headers: {
     HttpHeaders.acceptHeader: "application/json",
-    HttpHeaders.authorizationHeader: token
+    HttpHeaders.authorizationHeader: pref.getString("access_token")
   });
 
   List<DiscussionItem> discussions = List<DiscussionItem>();
@@ -283,18 +263,19 @@ Future<List<DiscussionItem>> getDiscussions(final token) async {
   }
 }
 
-Future<User> getUserByID({int userId, final token}) async {
+Future<User> getUserByID({int userId}) async {
   ///#####################################################
   ///       get the user id using the id pulled from
   ///       the maple crossing api, as well as using
   ///       the current users access token for easy
   ///       access.
+  SharedPreferences pref = await SharedPreferences.getInstance();
   final response = await http.get(
     "https://cpritchar.scweb.ca/mapleCrossing/api/user/$userId",
     headers: {
       HttpHeaders.acceptHeader: "application/json",
-      HttpHeaders.authorizationHeader: token
-    },
+      HttpHeaders.authorizationHeader: pref.getString("access_token")
+    }, 
   );
 
   if (response.statusCode == 200) {
@@ -316,7 +297,7 @@ Future<User> getUserByID({int userId, final token}) async {
   }
 }
 
-Card buildCards({String username, String question, List<String> tags, BuildContext context}) {
+Widget buildCard(DiscussionItem item, BuildContext context) {
   ///####################################################################
   /// Building the Discussion cards that will populate the discussions  #
   ///                                                                   #
@@ -330,59 +311,64 @@ Card buildCards({String username, String question, List<String> tags, BuildConte
   ///####################################################################
   List<Container> tagsList = List<Container>();
   int index = 0;
-  for (final tag in tags) {
+  for (final tag in item.tags) {
     if (index == 4)
       break;
     else
       index++;
-    tagsList.add(
-      new Container(
-        margin: EdgeInsets.fromLTRB(5, 0, 5, 5),
-        child: Text(
-          tag,
-          style: Theme.of(context).textTheme.button,
+    tagsList.add( 
+          new Container(
+          margin: EdgeInsets.fromLTRB(5, 0, 5, 5),
+          child: Text(
+            tag,
+            style: Theme.of(context).textTheme.button,
+          ),
+          padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50),
+              border: Border.all(
+                color: Colors.grey,
+              )),
         ),
-        padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(50),
-            border: Border.all(
-              color: Colors.grey,
-            )),
-      ),
     );
   }
-  return Card(
-    child: Padding(
-      padding: EdgeInsets.all(16),
-      child: Column(
-        children: <Widget>[
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              username,
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Color.fromRGBO(0, 0, 0, .3),),
-            ),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              question,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-              child: Wrap(
-                children: tagsList,
+  return GestureDetector(
+    onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>DiscussionContentPage(id: item.id, question: item.question, tags: item.tags)));
+            },
+      child: Card(
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          children: <Widget>[
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                item.username,
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color.fromRGBO(0, 0, 0, .3),),
               ),
             ),
-          ),
-        ],
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                item.question,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                child: Wrap(
+                  children: tagsList,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     ),
   );
@@ -395,6 +381,7 @@ class DiscussionItem {
   final int userId;
   final String question;
   final List<String> tags;
+  String username = null;
   DiscussionItem({this.id, this.userId, this.question, this.tags});
 }
 
