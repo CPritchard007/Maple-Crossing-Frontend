@@ -77,7 +77,12 @@ Widget buildMaterial({Widget child}){
               fontWeight: FontWeight.w600
             ),
             body1: TextStyle(
-              
+              fontSize: 15,
+              fontWeight: FontWeight.w600
+
+            ),
+            body2: TextStyle(
+              fontSize: 15,
             ),
             button: TextStyle(color: Colors.black,
             )
@@ -207,11 +212,14 @@ class _SceneState extends State<Scene> {
             title: Text("INFO"),
           ),
           // events item
-          BottomNavigationBarItem(
-              icon: ImageIcon(
-                AssetImage("assets/icons/events_button.png"),
-              ),
-              title: Text("EVENTS"))
+          // unable to be completed
+          //
+          //
+          // BottomNavigationBarItem(
+          //     icon: ImageIcon(
+          //       AssetImage("assets/icons/events_button.png"),
+          //     ),
+          //     title: Text("EVENTS"))
         ],
         //set the index to the starting index
         currentIndex: _currentIndex,

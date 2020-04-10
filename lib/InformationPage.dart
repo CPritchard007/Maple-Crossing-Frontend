@@ -27,16 +27,14 @@ class _InformationPageState extends State<InformationPage> {
     super.initState();
     _future = getAllResources(page: page);
 
-    _scrollController.addListener((){
-
-        if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent){
-          print("owww owww owwww");
-
-          page++;
-          getAllResources(page: page).then((val)=>
-            currentItems.addAll(val)
-          );
-        }
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        page++;
+        setState(() {
+          getAllResources(page: page).then((val) => currentItems.addAll(val));
+        });
+      }
     });
   }
 
@@ -64,7 +62,7 @@ class _InformationPageState extends State<InformationPage> {
 
                 /// how far will the slider extend to..
                 actionExtentRatio: 0.25,
-                child:  buildResources(resource),
+                child: buildResources(resource),
 
                 delegate: SlidableDrawerDelegate(),
 
@@ -90,8 +88,11 @@ class _InformationPageState extends State<InformationPage> {
                                   deleteResource(resource.id);
                                   Scaffold.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text("the resource has been deleted"),
-                                      duration: Duration(seconds: 6),),);
+                                      content:
+                                          Text("the resource has been deleted"),
+                                      duration: Duration(seconds: 6),
+                                    ),
+                                  );
                                 },
                               ),
                             ),
@@ -144,14 +145,15 @@ class _InformationPageState extends State<InformationPage> {
 deleteResource(final int resource) async {
   SharedPreferences pref = await SharedPreferences.getInstance();
   final response = await http.delete(
-      "https://cpritchar.scweb.ca/mapleCrossing/api/resource/${resource}", headers: {
+      "https://cpritchar.scweb.ca/mapleCrossing/api/resource/${resource}",
+      headers: {
         HttpHeaders.acceptHeader: "application/json",
         HttpHeaders.authorizationHeader: pref.getString("access_token"),
       });
 
-  if (response.statusCode == 200){
+  if (response.statusCode == 200) {
     print("the item has been deleted");
-  }else{
+  } else {
     print("error ${response.statusCode}");
   }
 }
@@ -187,13 +189,13 @@ Future<List<Resource>> getAllResources({int page}) async {
       resources.add(new Resource(
           resourceTitle: resource['title'],
           resourceText: resource['content'],
-          user: "",
+          user: resource['profile']['name'],
           favourite: false,
           id: resource['id']));
     }
 
     /// using that list of resources, pass the information on the the builder, and create a list of functioning resource cards
-    
+
     print("returning $resources");
     return resources;
   } else {
@@ -205,45 +207,44 @@ Future<List<Resource>> getAllResources({int page}) async {
 
 buildResources(Resource resource) {
   ///bulld resource cards
-   Card resourceItem = new Card(
-        ///allow the listview to match each resource by "Resource #id"
-        key: Key("resource ${resource.id}"),
-        child: Container(
-          padding: EdgeInsets.all(15.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                width: 290,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      '${resource.resourceTitle}',
-                      style:
-                          TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
-                    ),
-                    Container(
-                        padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
-                        child: Text(
-                          '${resource.resourceText}',
-                        )),
-                  ],
+  Card resourceItem = new Card(
+    ///allow the listview to match each resource by "Resource #id"
+    key: Key("resource ${resource.id}"),
+    child: Container(
+      padding: EdgeInsets.all(15.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            width: 290,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  '${resource.resourceTitle}',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
                 ),
-              ),
-              Container(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 0, 0, 0),
-                  child: SideMenu(
-                    resource: resource,
-                  ),
-                ),
-              )
-            ],
+                Container(
+                    padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                    child: Text(
+                      '${resource.resourceText}',
+                    )),
+              ],
+            ),
           ),
-        ),
-    );
-    return resourceItem;
+          Container(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(15, 0, 0, 0),
+              child: SideMenu(
+                resource: resource,
+              ),
+            ),
+          )
+        ],
+      ),
+    ),
+  );
+  return resourceItem;
 }
 
 class SideMenu extends StatefulWidget {

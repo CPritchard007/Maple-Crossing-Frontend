@@ -4,10 +4,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:maple_crossing_application/profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'main.dart';
 
 class DiscussionContentPage extends StatelessWidget {
   ///#################################################
@@ -132,14 +129,28 @@ class FutureDiscussionList extends StatefulWidget {
 }
 
 class _FutureDiscussionListState extends State<FutureDiscussionList> {
+  
   final id;
   _FutureDiscussionListState(this.id);
-
-  Future<List<Card>> _future;
+  Future<List<Comment>> _future;
+  List<Comment> currentItems = List<Comment>();
+  ScrollController _scrollController = ScrollController();
+  int page = 1;
   @override
   void initState() {
     super.initState();
-    _future = getAvailableComments(this.id);
+    _future = getAvailableComments(this.id,page: page);
+    _scrollController.addListener((){
+      if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent){
+        print("owwww owwww stop it!");
+        page++;
+        setState(() {
+          getAvailableComments(id, page: page).then((val)=>currentItems.addAll(val));
+        },
+        );
+      }
+    },
+    );
   }
 
   @override
@@ -148,12 +159,16 @@ class _FutureDiscussionListState extends State<FutureDiscussionList> {
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
+          currentItems = snapshot.data;
           return Expanded(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
-              child: ListView(
-                children: snapshot.data,
-              ),
+              child: ListView.builder(
+                controller: _scrollController,
+                itemBuilder: (context, position){
+                Comment item = currentItems[position];
+                return buildCommentCard(item, context: context);
+              },itemCount: currentItems.length,),
             ),
           );
         } else {
@@ -175,44 +190,22 @@ class Comment {
   Comment({this.comment, this.user});
 }
 
-Future<List<Card>> getAvailableComments(id) async {
+Future<List<Comment>> getAvailableComments(int id, {int page}) async {
+  print("page $page");
+
   List<Comment> comments = new List<Comment>();
-
-  final commentsJson = await getComments(id);
+  final commentsJson = await getComments(id, page: page);
   for (final comment in commentsJson['data']) {
-    final user = await getUser(comment['user_id']);
-    comments.add(new Comment(user: user.username, comment: comment['comment']));
+    comments.add(new Comment(user: comment['profile']['name'], comment: comment['comment']));
   }
-  return buildCommentCards(comments);
+  return comments;
 }
 
-List<Card> buildCommentCards(List<Comment> comments) {
-  final List<Card> cards = new List<Card>();
-  for (final comment in comments) {
-    print(comment.comment);
-    cards.add(
-      new Card(
-        child: Container(
-          height: 80,
-          padding: EdgeInsets.all(8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(comment.user),
-              Text(comment.comment),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-  return cards;
-}
 
-Future getComments(int id) async {
+Future getComments(int id, {int page}) async {
   final SharedPreferences pref = await SharedPreferences.getInstance();
   final response = await http.get(
-      "https://cpritchar.scweb.ca/mapleCrossing/api/discussion/$id/comment",
+      "https://cpritchar.scweb.ca/mapleCrossing/api/discussion/$id/comment?page=$page",
       headers: {
         HttpHeaders.acceptHeader: "application/json",
         HttpHeaders.authorizationHeader: pref.getString("access_token")
@@ -227,27 +220,40 @@ Future getComments(int id) async {
   }
 }
 
-Future<User> getUser(int id) async {
-  final SharedPreferences pref = await SharedPreferences.getInstance();
-  final response = await http.get(
-    "https://cpritchar.scweb.ca/mapleCrossing/api/user/$id",
-    headers: {
-      HttpHeaders.acceptHeader: "application/json",
-      HttpHeaders.contentTypeHeader: "x-www-form-urlencoded",
-      HttpHeaders.authorizationHeader: pref.getString("access_token")
-    },
-  );
-  if (response.statusCode == 200) {
-    final responseJson = json.decode(response.body);
-    print("grabbing users");
-    return new User(
-        firstName: responseJson['first_name'],
-        lastName: responseJson['last_name'],
-        email: responseJson['email'],
-        username: responseJson['name']);
-  } else {
-    print("unable to grab user on error: ${response.statusCode}");
-  }
+
+Widget buildCommentCard(Comment comment,{BuildContext context}) {
+      return Card(
+        child: Container(
+          padding: EdgeInsets.all(8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                  Icon(Icons.arrow_upward),
+                  Container(height: 8,),
+                  Container(width: 15,height: 15,decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(50),
+                    color: Colors.grey.withAlpha(140)
+                  ),)
+                ],),
+              ),
+              Expanded(
+                              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(comment.user, style: TextStyle(fontSize: 12, color: Colors.black.withAlpha(120))),
+                    Text(comment.comment, style: Theme.of(context).textTheme.body2,),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+    );
 }
 
 class CreateComment extends StatefulWidget {

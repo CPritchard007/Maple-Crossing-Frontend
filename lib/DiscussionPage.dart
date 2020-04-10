@@ -3,11 +3,8 @@ import 'dart:ffi';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:maple_crossing_application/profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'DiscussionContentPage.dart';
-import 'main.dart';
 
 ///###########################################
 ///      Main page that is displayed
@@ -33,12 +30,14 @@ class _DiscussionPageState extends State<DiscussionPage> {
         if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent){
           print("owww owww owwww");
 
-          isLoading = true;
           page++;
-          getDiscussions(page).then((val)=>
-            currentItems.addAll(val)
-          );
-          isLoading = false;
+          
+          setState(() {
+            isLoading = true;
+            getDiscussions(page).then((val)=>
+              currentItems.addAll(val));
+            isLoading = false;
+          });
         }
     });
   }
@@ -55,13 +54,21 @@ class _DiscussionPageState extends State<DiscussionPage> {
           
           currentItems = snapshot.data;
 
-          return ListView.builder(itemBuilder: (context, position){
-              DiscussionItem item = currentItems[position];
+          return Column(
+            children: <Widget>[
+              Expanded(
+                              child: Container(
+                  child: ListView.builder(itemBuilder: (context, position){
+                      DiscussionItem item = currentItems[position];
 
-            return buildCard(item, context);
-          },
-          itemCount: currentItems.length,
-          controller: _scrollController,);
+                    return buildCard(item, context);
+                  },
+                  itemCount: currentItems.length,
+                  controller: _scrollController,),
+                ),
+              ),
+            ],
+          );
         } else {
           return Container(
             child: Center(
@@ -227,8 +234,6 @@ Future<List<DiscussionItem>> getAvailableDiscussions(
   final discussions = await getDiscussions(page);
   for(int pos = 0; pos < discussions.length; pos ++){
     DiscussionItem item = discussions[pos];
-    User user = await getUserByID(userId: item.userId);
-    item.username = user.username;
   }
   return discussions;
 }
@@ -254,46 +259,13 @@ Future<List<DiscussionItem>> getDiscussions(int page) async {
           id: discussion['id'],
           userId: discussion['user_id'],
           question: discussion['question'],
+          username: discussion['profile']['name'],
           tags: discussion['tags'].toString().split(',')));
     }
 
     return discussions;
   } else {
     print("error, not returning data ${response.statusCode}");
-  }
-}
-
-Future<User> getUserByID({int userId}) async {
-  ///#####################################################
-  ///       get the user id using the id pulled from
-  ///       the maple crossing api, as well as using
-  ///       the current users access token for easy
-  ///       access.
-  SharedPreferences pref = await SharedPreferences.getInstance();
-  final response = await http.get(
-    "https://cpritchar.scweb.ca/mapleCrossing/api/user/$userId",
-    headers: {
-      HttpHeaders.acceptHeader: "application/json",
-      HttpHeaders.authorizationHeader: pref.getString("access_token")
-    }, 
-  );
-
-  if (response.statusCode == 200) {
-    ///####################################
-    ///  if the api returns a value of 200
-    ///  the application will build a user
-    ///  and return it to the
-    ///  getAvailableDiscissions function
-    print("users ${response.statusCode}");
-    final responseJson = json.decode(response.body);
-    return new User(
-        firstName: responseJson['first_name'],
-        lastName: responseJson['last_name'],
-        email: responseJson['email'],
-        username: responseJson['name']);
-    //####################################
-  } else {
-    print('user came back with error type: ${response.statusCode}');
   }
 }
 
@@ -355,7 +327,8 @@ Widget buildCard(DiscussionItem item, BuildContext context) {
               alignment: Alignment.centerLeft,
               child: Text(
                 item.question,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                //TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: Theme.of(context).textTheme.body1
               ),
             ),
             Align(
@@ -381,8 +354,8 @@ class DiscussionItem {
   final int userId;
   final String question;
   final List<String> tags;
-  String username = null;
-  DiscussionItem({this.id, this.userId, this.question, this.tags});
+  String username;
+  DiscussionItem({this.id, this.userId, this.question, this.tags, this.username});
 }
 
 buildCreationPage() {

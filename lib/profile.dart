@@ -55,7 +55,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           username: usernameController.value.text);
                           isEditing = false;
                     },
-                    child: Container(
+                    child: Container( 
                       padding: EdgeInsets.fromLTRB(8, 8, 8, 5),
                       alignment: Alignment.bottomLeft,
                       child: Text(
