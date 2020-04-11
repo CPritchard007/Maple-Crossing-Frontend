@@ -264,10 +264,9 @@ class _SceneState extends State<Scene> {
                   counterText: ""
                   ),
                   textAlignVertical: TextAlignVertical.center,
-                  maxLength: 50,
+                  maxLength: 15,
                   maxLengthEnforced: true,
                   cursorWidth: 0
-                  
                 ),
               ),
               Container(
@@ -309,10 +308,7 @@ class _SceneState extends State<Scene> {
             ),
             offset: Offset(0, 80),
             itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 1,
-                child: Text("Notification"),
-              ),
+              
               PopupMenuItem(
                 value: 2,
                 child: Text("Profile"),

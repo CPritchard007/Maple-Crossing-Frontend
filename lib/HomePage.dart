@@ -103,9 +103,7 @@ class HomePage extends StatelessWidget {
             ],
           ),
         ),
-
-        ///displays the traffic maps of the users location
-        GoogleMaps()
+        Expanded(child: GoogleMaps(false))
       ],
     );
   }
@@ -300,18 +298,26 @@ class _WaitTimeState extends State<WaitTime> {
 }
 
 class GoogleMaps extends StatefulWidget {
+  GoogleMaps(this.isLarge);
+  bool isLarge = false;
+
   @override
-  _GoogleMapsState createState() => _GoogleMapsState();
+  _GoogleMapsState createState() => _GoogleMapsState(isLarge);
 }
 
 class _GoogleMapsState extends State<GoogleMaps> {
+  _GoogleMapsState(this.isLarge);
+  bool isLarge;
   BitmapDescriptor sourceIcon;
 
   Completer<GoogleMapController> _controller = Completer();
   String _mapStyle;
   LocationData currentLocation;
   Location location;
-  CameraPosition cameraPosition = CameraPosition(target: LatLng(15,14), zoom: 15);
+  CameraPosition cameraPosition =
+      CameraPosition(target: LatLng(15, 14), zoom: 10);
+
+  CameraPosition initialCameraPosition = CameraPosition(target: LatLng(0, 0));
 
   @override
   void initState() {
@@ -320,36 +326,41 @@ class _GoogleMapsState extends State<GoogleMaps> {
     rootBundle.loadString('assets/styling/MapStyle.txt').then((string) {
       _mapStyle = string;
     });
-
-    location = new Location();
-    location.onLocationChanged().listen((LocationData cLoc) {
-      currentLocation = cLoc;
-    });
   }
 
+  void _currentLocation() async {
+    final GoogleMapController controller = await _controller.future;
+    LocationData currentLocation;
+    var location = new Location();
+    try {
+      currentLocation = await location.getLocation();
+    } on Exception {
+      currentLocation = null;
+    }
+
+    controller.animateCamera(CameraUpdate.newCameraPosition(
+      CameraPosition(
+        bearing: 0,
+        target: LatLng(currentLocation.latitude, currentLocation.longitude),
+        zoom: 17.0,
+      ),
+    ));
+  }
 
   @override
   Widget build(BuildContext context) {
 
-     CameraPosition initialCameraPosition = CameraPosition(
-      target:  LatLng(0,0)
-   );
-
-if (currentLocation != null) {
-      initialCameraPosition = CameraPosition(
-         target: LatLng(currentLocation.latitude,
-            currentLocation.longitude),
-      );
-   }
-
-    return Expanded(
-      child: Stack(
+    return Stack(
         children: <Widget>[
           GoogleMap(
-            onMapCreated: ((GoogleMapController controller){
+            trafficEnabled: true,
+            initialCameraPosition: initialCameraPosition,
+            onMapCreated: (GoogleMapController controller) {
               _controller.complete(controller);
-            }),
-            initialCameraPosition: initialCameraPosition,),
+              controller.setMapStyle(_mapStyle);
+            },
+            myLocationEnabled: false,
+          ),
           Padding(
             padding: const EdgeInsets.all(10.0),
             child: Align(
@@ -358,14 +369,10 @@ if (currentLocation != null) {
                 onPressed: () => {
                   setState(() {
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => MapPage()));
+                       isLarge? Navigator.pop(context) : Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage())));
                   })
                 },
-                child: Icon(
-                  Icons.crop_free,
-                  color: Colors.black,
-                  size: 32,
-                ),
+                child: isLarge? ImageIcon(AssetImage("assets/icons/Shrink.png"), color: Colors.black,) : Icon(Icons.crop_free, color: Colors.black,),
               ),
               alignment: Alignment.bottomRight,
             ),
@@ -377,9 +384,7 @@ if (currentLocation != null) {
               child: FloatingActionButton(
                 backgroundColor: Colors.white,
                 heroTag: "MyLocation",
-                onPressed: () {
-                  
-                },
+                onPressed: _currentLocation,
                 child: Icon(
                   Icons.my_location,
                   color: Colors.black,
@@ -389,7 +394,6 @@ if (currentLocation != null) {
             ),
           ),
         ],
-      ),
     );
   }
 }

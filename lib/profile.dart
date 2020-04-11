@@ -123,7 +123,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             color: Color.fromRGBO(250, 250, 250, .3),
                           ),
                         ),
-                        width: 300,
+                        width: 250,
                         height: 35,
                         child: TextField(
                           style: TextStyle(fontSize: 14, color: Colors.white),
@@ -160,7 +160,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             color: Color.fromRGBO(250, 250, 250, .3),
                           ),
                         ),
-                        width: 300,
+                        width: 250,
                         height: 35,
                         padding: EdgeInsets.fromLTRB(8, 8, 8, 4),
                         child: TextField(
@@ -198,7 +198,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             color: Color.fromRGBO(250, 250, 250, .3),
                           ),
                         ),
-                        width: 300,
+                        width: 250,
                         height: 35,
                         padding: EdgeInsets.fromLTRB(8, 8, 8, 4),
                         child: TextField(

@@ -215,21 +215,22 @@ buildResources(Resource resource) {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Container(
-            width: 290,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  '${resource.resourceTitle}',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
-                ),
-                Container(
-                    padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
-                    child: Text(
-                      '${resource.resourceText}',
-                    )),
-              ],
+          Expanded(
+                      child: Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    '${resource.resourceTitle}',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
+                  ),
+                  Container(
+                      padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                      child: Text(
+                        '${resource.resourceText}',
+                      )),
+                ],
+              ),
             ),
           ),
           Container(
