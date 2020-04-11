@@ -104,7 +104,7 @@ class _CreateDiscussionState extends State<CreateDiscussion> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor.withAlpha(180),
+      backgroundColor: Color.fromRGBO(240, 240, 240, 1),
       appBar: AppBar(
         title: Text('Create Discussion'),
         leading: IconButton(
@@ -119,7 +119,7 @@ class _CreateDiscussionState extends State<CreateDiscussion> {
         padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
         decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(color: Color.fromRGBO(200, 95, 95, 1), width: 2),
+            border: Border.all(color: Colors.grey, width: 2),
             borderRadius: BorderRadius.circular(20)),
         child: Form(
           child: ListView.builder(
@@ -140,10 +140,12 @@ class _CreateDiscussionState extends State<CreateDiscussion> {
                     icon: Icon(Icons.send),
                     alignment: Alignment.centerRight,
                     onPressed: () {
+                      if(questionController != null){
                       submitDiscussionData(questionController, tagsController);
                       setState(() {
                         Navigator.pop(context);
                       });
+                    }
                     },
                   ),
                 );
@@ -207,7 +209,7 @@ class _CreateDiscussionState extends State<CreateDiscussion> {
     print(tagsToString);
 
     final response = await http.post(
-      "https://cpritchar.scweb.ca/mapleCrossing/api/discussion",
+      "https://cpritchar.scweb.ca/mapleCrossing/api/discussion/create",
       headers: {
         HttpHeaders.acceptHeader: "application/json",
         HttpHeaders.authorizationHeader: pref.getString("access_token")
@@ -218,8 +220,9 @@ class _CreateDiscussionState extends State<CreateDiscussion> {
         "user_id": "${pref.getInt("user_id")}"
       },
     );
-
+    print(response.body);
     if (response.statusCode == 200) {
+      print("Succesfully created data");
     } else {
       print(response.statusCode);
     }

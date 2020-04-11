@@ -27,13 +27,17 @@ Future<bool> fetchProfile(String user, String pass) async {
   if (response.statusCode == 200) {
     SharedPreferences pref = await SharedPreferences.getInstance();
     final responseJson = json.decode(response.body);
-    User user = await getUser();
     pref.setString('access_token',
         "${responseJson['token_type']} ${responseJson['access_token']}");
     pref.setString('refresh_token',
         "${responseJson['refresh_token']}");
     pref.setInt("expires_in", responseJson['expires_in']);
+
+    User user = await getUser();
+    
     pref.setInt("user_id", user.id);
+    print("\n\n\n\n\n\n\n${user.id}\n\n\n\n\n\n\n\n\n");
+
     return true;
   } else {
     print('status code ${response.statusCode}: {\n' +

@@ -315,7 +315,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
   LocationData currentLocation;
   Location location;
   CameraPosition cameraPosition =
-      CameraPosition(target: LatLng(15, 14), zoom: 10);
+      CameraPosition(target: LatLng(15, 14), zoom: 20);
 
   CameraPosition initialCameraPosition = CameraPosition(target: LatLng(0, 0));
 
@@ -342,7 +342,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
       CameraPosition(
         bearing: 0,
         target: LatLng(currentLocation.latitude, currentLocation.longitude),
-        zoom: 17.0,
+        zoom: 11.0,
       ),
     ));
   }

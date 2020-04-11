@@ -389,17 +389,21 @@ class _CreateInformationState extends State<CreateInformation> {
                       maxLines: null,
                       controller: contentController,
                     ),
-                    IconButton(
-                      icon: Icon(Icons.send),
-                      alignment: Alignment.centerRight,
-                      onPressed: () {
-                        submitResources(
-                            title: titleController.value.text,
-                            content: contentController.value.text);
-                        setState(() {
-                          Navigator.pop(context);
-                        });
-                      },
+                    Align( alignment: Alignment.centerRight,
+                        child: IconButton(
+                        icon: Icon(Icons.send),
+                        alignment: Alignment.centerRight,
+                        onPressed: () {
+                          if(titleController.value.text != "" && contentController.value.text != ""){
+                          submitResources(
+                              title: titleController.value.text,
+                              content: contentController.value.text);
+                          setState(() {
+                            Navigator.pop(context);
+                          });
+                          }
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -415,7 +419,7 @@ class _CreateInformationState extends State<CreateInformation> {
 Future<void> submitResources({String title, content}) async {
   final SharedPreferences pref = await SharedPreferences.getInstance();
   final response = await http
-      .post("https://cpritchar.scweb.ca/mapleCrossing/api/resource", headers: {
+      .post("https://cpritchar.scweb.ca/mapleCrossing/api/resource/create", headers: {
     HttpHeaders.acceptHeader: "application/json",
     HttpHeaders.authorizationHeader: pref.getString("access_token")
   }, body: {
@@ -426,5 +430,7 @@ Future<void> submitResources({String title, content}) async {
   print(pref.getString("access_token"));
   if (response.statusCode == 200) {
     print("successfull");
-  } else {}
+  } else {
+    print("error with code: ${response.statusCode}");
+  }
 }

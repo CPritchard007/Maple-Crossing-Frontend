@@ -320,7 +320,7 @@ class _CreateCommentState extends State<CreateComment> {
 
 Future<void> submitComment({String comment, int discussionId}) async {
   SharedPreferences pref = await SharedPreferences.getInstance();
-  final response = await http.post("https://cpritchar.scweb.ca/mapleCrossing/api/comment",
+  final response = await http.post("https://cpritchar.scweb.ca/mapleCrossing/api/comment/create",
   headers: {
     HttpHeaders.acceptHeader: "application/json",
     HttpHeaders.authorizationHeader: pref.getString("access_token")

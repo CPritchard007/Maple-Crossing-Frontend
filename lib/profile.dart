@@ -233,7 +233,6 @@ Future<User> getUser() async {
     "https://cpritchar.scweb.ca/mapleCrossing/api/user",
     headers: {
       HttpHeaders.acceptHeader: "application/json",
-      HttpHeaders.contentTypeHeader: "application/x-www-form-urlencoded",
       HttpHeaders.authorizationHeader: pref.getString("access_token"),
     },
   );
