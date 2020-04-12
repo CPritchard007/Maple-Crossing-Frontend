@@ -8,15 +8,32 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_slidable/flutter_slidable.dart';
 
+
+///#####################################################################
+///
+///                            Information Page
+///
+///        @author  Curtis Pritchard
+/// 
+///        @description   This part of the application allows
+///         the user to view important information that is
+///         posted.
+///
+///###################################################################
+
+
+
+
 class InformationPage extends StatefulWidget {
-  ///############################################
-  ///
+  
   static TextEditingController controller = new TextEditingController();
   @override
   _InformationPageState createState() => _InformationPageState();
 }
 
 class _InformationPageState extends State<InformationPage> {
+  ///#######################################################
+  ///   The
   Future<List<Resource>> _future;
   SlidableController _controller;
   List<Resource> currentItems = new List<Resource>();
@@ -279,10 +296,6 @@ class _SideMenuState extends State<SideMenu> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
-          Container(
-            height: 32,
-            width: 32,
-          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 50, 10, 50),
             child: Icon(
@@ -291,25 +304,7 @@ class _SideMenuState extends State<SideMenu> {
               color: Colors.black,
             ),
           ),
-          IconButton(
-            ///if the user has favourited this item already, the item will be removed, or the opposite
-            icon: Icon(resource.favourite ? Icons.star : Icons.star_border),
-            onPressed: () {
-              setState(
-                () {
-                  /// remind the user that the item has been added/removed from your favourites
-                  print(resource.favourite);
-                  resource.favourite = !resource.favourite;
-                  Scaffold.of(context).showSnackBar(new SnackBar(
-                    content: Text(resource.favourite
-                        ? "Adding resource to favourites."
-                        : "Removing resource to favourites"),
-                    duration: Duration(seconds: 2),
-                  ));
-                },
-              );
-            },
-          ),
+
         ],
       ),
     );
@@ -339,7 +334,7 @@ class CreateInformation extends StatefulWidget {
 class _CreateInformationState extends State<CreateInformation> {
   TextEditingController titleController;
   TextEditingController contentController;
-
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   void initState() {
     super.initState();
@@ -368,6 +363,7 @@ class _CreateInformationState extends State<CreateInformation> {
             border: Border.all(color: Colors.grey),
             borderRadius: BorderRadius.circular(20)),
         child: Form(
+          key: _formKey,
           child: Container(
             padding: EdgeInsets.all(10),
             child: ListView(
@@ -379,12 +375,22 @@ class _CreateInformationState extends State<CreateInformation> {
                     Container(
                       width: 220,
                       child: TextFormField(
-                        decoration: InputDecoration(labelText: "title"),
+                        validator: (value){
+                          if(value == ""){
+                            return "The title section cannot be left empty";
+                          }
+                        },
+                        decoration: InputDecoration(labelText: "* title"),
                         controller: titleController,
                       ),
                     ),
                     TextFormField(
-                      decoration: InputDecoration(labelText: "content"),
+                      validator: (value){
+                        if (value == ""){
+                          return "The content section cannot be left empty";
+                        }
+                      },
+                      decoration: InputDecoration(labelText: "* content"),
                       maxLength: 400,
                       maxLines: null,
                       controller: contentController,
@@ -394,7 +400,7 @@ class _CreateInformationState extends State<CreateInformation> {
                         icon: Icon(Icons.send),
                         alignment: Alignment.centerRight,
                         onPressed: () {
-                          if(titleController.value.text != "" && contentController.value.text != ""){
+                          if(_formKey.currentState.validate()){
                           submitResources(
                               title: titleController.value.text,
                               content: contentController.value.text);

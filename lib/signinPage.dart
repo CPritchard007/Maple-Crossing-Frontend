@@ -13,9 +13,7 @@ Future<bool> fetchProfile(String user, String pass) async {
   //build api link
   final response = await http
       .post("https://cpritchar.scweb.ca/mapleCrossing/oauth/token", headers: {
-    HttpHeaders.acceptHeader: "application/json",
-    HttpHeaders.contentTypeHeader: "application/x-www-form-urlencoded"
-  
+    HttpHeaders.acceptHeader: "application/json",  
   }, body: {
     'grant_type': "password",
     'client_id': Const.CLIENT_ID,
@@ -158,10 +156,9 @@ class _TextfieldsState extends State<Textfields> {
                         onPressed: () {
                           String email = _emailCon.value.text;
                           String pass = _passwordCon.value.text;
+                          if(_formKey.currentState.validate())
                           fetchProfile(email, pass).then( (val) => val ?  
                           Navigator.push(context,MaterialPageRoute(builder: (context) =>  LoadScreen())) : null);
-                          
-                          
                         })
                   ],
                 ),
@@ -176,7 +173,8 @@ class _TextfieldsState extends State<Textfields> {
                   alignment: Alignment.centerLeft,
                 )
               ],
-            )),
+            ),
+          ),
       ],
     );
   }

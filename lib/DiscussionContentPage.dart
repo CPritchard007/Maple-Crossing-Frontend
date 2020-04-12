@@ -6,12 +6,26 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+///#####################################################################
+///
+///                       Discussion Comments Page
+///
+///        @author  Curtis Pritchard
+/// 
+///        @description   This part of the application allows
+///         the user to view important information that is
+///         posted.
+///
+///###################################################################
+
+
 class DiscussionContentPage extends StatelessWidget {
   ///#################################################
   ///       This is the starting location of the
   ///       full discussion page.
   ///
-
+  ///
   DiscussionContentPage({this.id, this.question, this.tags});
   final String question;
   final List<String> tags;
@@ -25,17 +39,20 @@ class DiscussionContentPage extends StatelessWidget {
     5: [38, 70, 53]
   };
 
-  /// information passed on from the applications discussion page
+  // information passed on from the applications discussion page
 
   @override
   Widget build(BuildContext context) {
-    /// list of tags that will be used on the head of the page
+    // list of tags that will be used on the head of the page
     List<Container> tagList = List<Container>();
+    // new random to be used to color the tags
     Random ran = new Random(colors.length);
 
     for (String tag in tags) {
+      //for each of the tags in the list, the user
       final color = colors[ran.nextInt(colors.length)];
       tagList.add(
+        // create tag item
         new Container(
           padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
           margin: EdgeInsets.fromLTRB(4, 0, 4, 0),
@@ -52,69 +69,70 @@ class DiscussionContentPage extends StatelessWidget {
     }
 
     return Scaffold(
-        floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add, size: 40),
-          backgroundColor: Color.fromRGBO(254, 95, 95, 1),
+      // Add a floating action button that will allow the user to create a comment
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add, size: 40),
+        backgroundColor: Color.fromRGBO(254, 95, 95, 1),
+        onPressed: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => CreateComment(id)));
+        },
+      ),
+
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios),
           onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateComment(id)));
+            Navigator.pop(context);
           },
         ),
-        appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-        ),
-        body: Column(
-          children: <Widget>[
-            Container(
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-                      child: Align(
-                        child: Text(
-                          question,
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.w600),
-                        ),
-                        alignment: Alignment.centerLeft,
+      ),
+      body: Column(
+        children: <Widget>[
+          Container(
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+                    child: Align(
+                      child: Text(
+                        question,
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.w600),
                       ),
-                    ),
-                    Align(
                       alignment: Alignment.centerLeft,
-                      child: Wrap(
-                        alignment: WrapAlignment.start,
-                        children: tagList,
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              decoration: BoxDecoration(
-                border: Border(
-                    bottom: BorderSide(
-                        width: 0,
-                        color: Colors.black,
-                        style: BorderStyle.solid)),
-                color: Colors.white,
-                boxShadow: [
-                  new BoxShadow(
-                    color: Colors.grey,
-                    offset: Offset(0, -2),
-                    spreadRadius: 4,
-                    blurRadius: 5,
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Wrap(
+                      alignment: WrapAlignment.start,
+                      children: tagList,
+                    ),
                   )
                 ],
               ),
             ),
-            FutureDiscussionList(id),
-          ],
-        ),
+            decoration: BoxDecoration(
+              border: Border(
+                  bottom: BorderSide(
+                      width: 0, color: Colors.black, style: BorderStyle.solid)),
+              color: Colors.white,
+              boxShadow: [
+                new BoxShadow(
+                  color: Colors.grey,
+                  offset: Offset(0, -2),
+                  spreadRadius: 4,
+                  blurRadius: 5,
+                )
+              ],
+            ),
+          ),
+          FutureDiscussionList(id),
+        ],
+      ),
     );
   }
 }
@@ -129,7 +147,6 @@ class FutureDiscussionList extends StatefulWidget {
 }
 
 class _FutureDiscussionListState extends State<FutureDiscussionList> {
-  
   final id;
   _FutureDiscussionListState(this.id);
   Future<List<Comment>> _future;
@@ -139,17 +156,34 @@ class _FutureDiscussionListState extends State<FutureDiscussionList> {
   @override
   void initState() {
     super.initState();
-    _future = getAvailableComments(this.id,page: page);
-    _scrollController.addListener((){
-      if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent){
-        print("owwww owwww stop it!");
-        page++;
-        setState(() {
-          getAvailableComments(id, page: page).then((val)=>currentItems.addAll(val));
-        },
-        );
-      }
-    },
+    ///################################################################
+    ///       This will allow the user to get more information
+    ///       if the user pulls the list to the very bottom.
+    
+
+
+    //  get all the discussion information once, then dont call
+    //  for it again until reentering the page.
+    _future = getAvailableComments(this.id, page: page);
+
+    _scrollController.addListener(
+      () {
+        //  this if statement watches the list and will trigger if
+        //  the list hits the bottom, and gets the next page in the 
+        //  pagination
+        if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent) {
+            //get the next page in the list
+          page++;
+          setState(
+            () {
+              
+              getAvailableComments(id, page: page)
+                  .then((val) => currentItems.addAll(val));
+            },
+          );
+        }
+      },
     );
   }
 
@@ -165,10 +199,12 @@ class _FutureDiscussionListState extends State<FutureDiscussionList> {
               padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
               child: ListView.builder(
                 controller: _scrollController,
-                itemBuilder: (context, position){
-                Comment item = currentItems[position];
-                return buildCommentCard(item, context: context);
-              },itemCount: currentItems.length,),
+                itemBuilder: (context, position) {
+                  Comment item = currentItems[position];
+                  return buildCommentCard(item, context: context);
+                },
+                itemCount: currentItems.length,
+              ),
             ),
           );
         } else {
@@ -196,11 +232,11 @@ Future<List<Comment>> getAvailableComments(int id, {int page}) async {
   List<Comment> comments = new List<Comment>();
   final commentsJson = await getComments(id, page: page);
   for (final comment in commentsJson['data']) {
-    comments.add(new Comment(user: comment['profile']['name'], comment: comment['comment']));
+    comments.add(new Comment(
+        user: comment['profile']['name'], comment: comment['comment']));
   }
   return comments;
 }
-
 
 Future getComments(int id, {int page}) async {
   final SharedPreferences pref = await SharedPreferences.getInstance();
@@ -220,40 +256,50 @@ Future getComments(int id, {int page}) async {
   }
 }
 
-
-Widget buildCommentCard(Comment comment,{BuildContext context}) {
-      return Card(
-        child: Container(
-          padding: EdgeInsets.all(8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                  Icon(Icons.arrow_upward),
-                  Container(height: 8,),
-                  Container(width: 15,height: 15,decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    color: Colors.grey.withAlpha(140)
-                  ),)
-                ],),
-              ),
-              Expanded(
-                              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(comment.user, style: TextStyle(fontSize: 12, color: Colors.black.withAlpha(120))),
-                    Text(comment.comment, style: Theme.of(context).textTheme.body2,),
-                  ],
+Widget buildCommentCard(Comment comment, {BuildContext context}) {
+  return Card(
+    child: Container(
+      padding: EdgeInsets.all(8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Icon(Icons.arrow_upward),
+                Container(
+                  height: 8,
                 ),
-              ),
-            ],
+                Container(
+                  width: 15,
+                  height: 15,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(50),
+                      color: Colors.grey.withAlpha(140)),
+                )
+              ],
+            ),
           ),
-        ),
-    );
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(comment.user,
+                    style: TextStyle(
+                        fontSize: 12, color: Colors.black.withAlpha(120))),
+                Text(
+                  comment.comment,
+                  style: Theme.of(context).textTheme.body2,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class CreateComment extends StatefulWidget {
@@ -265,9 +311,10 @@ class CreateComment extends StatefulWidget {
 
 class _CreateCommentState extends State<CreateComment> {
   _CreateCommentState(this.id);
-  
+
   final id;
   TextEditingController commentController;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -279,7 +326,7 @@ class _CreateCommentState extends State<CreateComment> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            backgroundColor: Color.fromRGBO(240, 240, 240, 1),
+      backgroundColor: Color.fromRGBO(240, 240, 240, 1),
       appBar: AppBar(
         title: Text('Create Comment'),
         leading: IconButton(
@@ -297,21 +344,43 @@ class _CreateCommentState extends State<CreateComment> {
             border: Border.all(color: Colors.grey, width: 2),
             borderRadius: BorderRadius.circular(20)),
         child: Form(
+          key: _formKey,
           child: ListView(
             shrinkWrap: true,
             children: <Widget>[
-            TextFormField(decoration: InputDecoration(labelText: "comment"), maxLength: 250, maxLengthEnforced: true, maxLines: null,controller: commentController,),
-            IconButton(
-                    icon: Icon(Icons.send),
-                    alignment: Alignment.centerRight,
-                    onPressed: () {
-                      submitComment(comment: commentController.value.text, discussionId: id);
-                      setState(() {
-                        Navigator.pop(context);
-                      });
+              TextFormField(
+                decoration: InputDecoration(labelText: "comment"),
+                validator: (value){
+                  if ( value == "" ){
+                    return "this content cannot be left empty";
+                  }
+                },
+                maxLength: 250,
+                maxLengthEnforced: true,
+                maxLines: null,
+                controller: commentController,
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: GestureDetector(
+                    child: Icon(Icons.send),
+                    onTap: () {
+                      if (_formKey.currentState.validate()) {
+                        submitComment(
+                            comment: commentController.value.text,
+                            discussionId: id);
+                        setState(() {
+                          Navigator.pop(context);
+                        });
+                      }
                     },
                   ),
-          ],),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -320,21 +389,20 @@ class _CreateCommentState extends State<CreateComment> {
 
 Future<void> submitComment({String comment, int discussionId}) async {
   SharedPreferences pref = await SharedPreferences.getInstance();
-  final response = await http.post("https://cpritchar.scweb.ca/mapleCrossing/api/comment/create",
-  headers: {
-    HttpHeaders.acceptHeader: "application/json",
-    HttpHeaders.authorizationHeader: pref.getString("access_token")
-  },
-  body: {
-    "discussion_id": "${discussionId}",
-    "comment": comment,
-    "user_id": "${pref.getInt("user_id")}"
-  });
+  final response = await http.post(
+      "https://cpritchar.scweb.ca/mapleCrossing/api/comment/create",
+      headers: {
+        HttpHeaders.acceptHeader: "application/json",
+        HttpHeaders.authorizationHeader: pref.getString("access_token")
+      },
+      body: {
+        "discussion_id": "${discussionId}",
+        "comment": comment,
+        "user_id": "${pref.getInt("user_id")}"
+      });
 
-  if (response.statusCode == 200){
-    
+  if (response.statusCode == 200) {
   } else {
     print(response.statusCode);
   }
 }
-

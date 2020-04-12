@@ -28,18 +28,19 @@ class _DiscussionPageState extends State<DiscussionPage> {
     _scrollController.addListener((){
 
         if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent){
-          print("owww owww owwww");
 
           page++;
           
           setState(() {
             isLoading = true;
+            print("\n\n\n\n\nAdding next page\n\n\n\n");
             getDiscussions(page).then((val)=>
               currentItems.addAll(val));
             isLoading = false;
           });
         }
-    });
+      },
+    );
   }
 
   @override
@@ -93,7 +94,7 @@ class CreateDiscussion extends StatefulWidget {
 class _CreateDiscussionState extends State<CreateDiscussion> {
   TextEditingController questionController;
   List<TextEditingController> tagsController = List<TextEditingController>();
-
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   void initState() {
     super.initState();
@@ -122,16 +123,23 @@ class _CreateDiscussionState extends State<CreateDiscussion> {
             border: Border.all(color: Colors.grey, width: 2),
             borderRadius: BorderRadius.circular(20)),
         child: Form(
+          key: _formKey,
           child: ListView.builder(
             shrinkWrap: true,
             itemBuilder: (context, position) {
               if (position == 0) {
                 return TextFormField(
-                  decoration: InputDecoration(labelText: "question"),
+                  decoration: InputDecoration(labelText: "* question"),
                   maxLength: 250,
                   maxLengthEnforced: true,
-                  maxLines: null,
                   controller: questionController,
+                  validator: (value){
+                    if (value == ""){
+                      return "The value of this field must not be left empty";
+                    }else if(value.length < 20){
+                      return "The question you are asking is too short (${value.length}/20)";
+                    }
+                  },
                 );
               } else if (position > tagsController.length) {
                 return Padding(
@@ -140,7 +148,7 @@ class _CreateDiscussionState extends State<CreateDiscussion> {
                     icon: Icon(Icons.send),
                     alignment: Alignment.centerRight,
                     onPressed: () {
-                      if(questionController != null){
+                      if(_formKey.currentState.validate()){
                       submitDiscussionData(questionController, tagsController);
                       setState(() {
                         Navigator.pop(context);

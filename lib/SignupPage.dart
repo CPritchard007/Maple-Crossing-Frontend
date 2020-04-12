@@ -150,7 +150,6 @@ class _SignupFormState extends State<SignupForm> {
               IconButton(
                 icon: Icon(Icons.arrow_forward),
                 onPressed: () {
-                  _formKey.currentState.validate();
                   if (_formKey.currentState.validate())
                     registerAccount(
                             _usernameCon.value.text,
