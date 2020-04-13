@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:maple_crossing_application/DiscussionPage.dart';
-import 'package:maple_crossing_application/EventPage.dart';
 import 'package:maple_crossing_application/HomePage.dart';
 import 'package:maple_crossing_application/InformationPage.dart';
 import 'package:maple_crossing_application/profile.dart';
@@ -12,69 +13,104 @@ import 'package:http/http.dart' as http;
 import 'Const.dart';
 
 void main() {
-  //######################
-  //  ( ▷ ) Starting Scene
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   runApp(LoadScreen());
 }
+BuildContext mainContext;
 
 class LoadScreen extends StatelessWidget {
-  //######################################
-  //    The Application will load the
-  //    default scene, including the
-  //    default theme data. after this
-  //    is added, the application will
-  //    check if the application contains
-  //    the users refresh_token, or if
-  //    the user needs to sign in.
+  ///######################################
+  ///    The Application will load the
+  ///    default scene, including the
+  ///    default theme data. after this
+  ///    is added, the application will
+  ///    check if the application contains
+  ///    the users refresh_token, or if
+  ///    the user needs to sign in.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-          backgroundColor: Color.fromRGBO(240, 240, 240, 1),
-          primaryColor: Color.fromRGBO(254, 95, 95, 1),
-          textTheme: TextTheme(
-              display3: TextStyle(fontSize: 52, fontWeight: FontWeight.w800),
-              display2: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
-              display1: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                  color: Color.fromRGBO(0, 0, 0, 0.3)))),
-      home: FutureBuilder(
+    mainContext = context;
+    return 
+      buildMaterial(child: FutureBuilder(
+        
         future: checkLocalProfileData(),
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data) {
-            //the user has joined into the application previously,
-            //this will move the user straight to the home page.
-            return Scene();
+            ///the user has joined into the application previously,
+            ///this will move the user straight to the home page.
+            return Scene(0);
           } else {
-            //the user has not signed in yet, so the user is sent to
-            //the user signin page.
+            ///the user has not signed in yet, so the user is sent to
+            ///the user signin page.
             return SignIn();
           }
         },
       ),
     );
   }
-  //######################################
+  ///######################################
+}
+
+Widget buildMaterial({Widget child}){
+  return MaterialApp(
+      theme: ThemeData(
+          backgroundColor: Color.fromRGBO(240, 240, 240, 1),
+          primaryColor: Color.fromRGBO(254, 95, 95, 1),
+          fontFamily: 'Verdana',
+          textTheme: TextTheme(
+            display1: TextStyle(
+              fontWeight: FontWeight.w900,
+              color: Colors.black.withAlpha(150)
+            ),
+            headline: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.black.withAlpha(130)
+            ),
+            subhead: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.black.withAlpha(130),
+            ),
+            title: TextStyle(
+              fontWeight: FontWeight.w600
+            ),
+            caption: TextStyle(
+              fontWeight: FontWeight.w600
+            ),
+            body1: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600
+
+            ),
+            body2: TextStyle(
+              fontSize: 15,
+            ),
+            button: TextStyle(color: Colors.black,
+            )
+          )),
+      home: child
+    );
 }
 
 Future<bool> checkLocalProfileData() async {
-  //########################################
-  //     does the user need to log in?
+  ///########################################
+  ///     does the user need to log in?
   SharedPreferences pref = await SharedPreferences.getInstance();
 
   // the application has the users refresh token already?
   print(pref.getString("refresh_token") != null
-      ? "refresh token:\t🟢" // YES
-      : "refresh token:\t🔴"); // NO
+      ? "refresh token:\t🟢" /// YES
+      : "refresh token:\t🔴"); /// NO
   // the applcation has a current access token?
   print(pref.getString("access_token") != null
-      ? "access token:\t🟢" // YES
-      : "access token:\t🔴"); // NO
+      ? "access token:\t🟢" /// YES
+      : "access token:\t🔴"); /// NO
   // the application has a current expired_in date?
   print(pref.getInt("expires_in") != null
       ? "expires in:\t🟢" // YES
       : "expires in:\t🔴"); // NO
+  print(pref.getInt("user_id") != null
+      ? "user_id:\t🟢" // YES
+      : "user_id:\t🔴"); // NO
   // Print the answer to the console and return to LoadScreen()
   if (pref.getString("refresh_token") == null ||
       pref.getString("access_token") == null ||
@@ -89,18 +125,18 @@ Future<bool> checkLocalProfileData() async {
 }
 
 Future<bool> getNewCredentials() async {
-  //####################################
-  //    refresh the local values in my phone
-  //   the application must use the current refresh_token
-  //   and generate a new refresh_token, access_token and
-  //   expiration_date each time you log into the application.
+  ///####################################
+  ///    refresh the local values in my phone
+  ///   the application must use the current refresh_token
+  ///   and generate a new refresh_token, access_token and
+  ///   expiration_date each time you log into the application.
 
   SharedPreferences pref = await SharedPreferences.getInstance();
   // make a call to the user auth token api, to refresh the data
   final response = await http
       .post("https://cpritchar.scweb.ca/mapleCrossing/oauth/token", headers: {
     HttpHeaders.acceptHeader: "application/json",
-    HttpHeaders.contentTypeHeader: "application/x-www-form-urlencoded"
+    HttpHeaders.contentTypeHeader: "application/x-www-form-urlencoded",
   }, body: {
     'grant_type': "refresh_token",
     'client_id': Const.CLIENT_ID,
@@ -108,45 +144,48 @@ Future<bool> getNewCredentials() async {
     'refresh_token': pref.getString("refresh_token"),
   });
   if (response.statusCode == 200) {
-    //############################
-    //  decode the information to
-    //  allow my application to
-    //  parse it into the applications
-    //  SharePreferences (local storage).
+    ///############################
+    ///  decode the information to
+    ///  allow my application to
+    ///  parse it into the applications
+    ///  SharePreferences (local storage).
     final jsonResponse = json.decode(response.body);
     pref.setString('access_token', "Bearer ${jsonResponse['access_token']}");
     pref.setString('refresh_token', jsonResponse['refresh_token']);
     pref.setInt('expires_in', jsonResponse['expires_in']);
   } else {
     // the application has an error, this shouldnt be called.
-    print("invalid response from application");
+    print("invalid response from application: ${response.statusCode}");
   }
 
   //####################################
 }
 
 class Scene extends StatefulWidget {
+  Scene(this.currentPage);
+  final currentPage;
+
   @override
-  _SceneState createState() => _SceneState();
+  _SceneState createState() => _SceneState(currentPage);
 }
 
 class _SceneState extends State<Scene> {
+  _SceneState(this._currentIndex);
   int _currentIndex = 0;
 
   var _page = {
     0: HomePage(),
     1: DiscussionPage(),
     2: InformationPage(),
-    3: EventPage(),
   };
 
   @override
   Widget build(BuildContext context) {
-  //####################################
-  //   this is a scene that is used for
-  //   every page. this builds the
-  //   applications bottomNav that calls
-  //   each page once it is pressed.
+    ///####################################
+    ///   this is a scene that is used for
+    ///   every page. this builds the
+    ///   applications bottomNav that calls
+    ///   each page once it is pressed.
 
     return Scaffold(
       appBar: buildAppBar(context, _currentIndex),
@@ -172,11 +211,14 @@ class _SceneState extends State<Scene> {
             title: Text("INFO"),
           ),
           // events item
-          BottomNavigationBarItem(
-              icon: ImageIcon(
-                AssetImage("assets/icons/events_button.png"),
-              ),
-              title: Text("EVENTS"))
+          // unable to be completed
+          //
+          //
+          // BottomNavigationBarItem(
+          //     icon: ImageIcon(
+          //       AssetImage("assets/icons/events_button.png"),
+          //     ),
+          //     title: Text("EVENTS"))
         ],
         //set the index to the starting index
         currentIndex: _currentIndex,
@@ -193,24 +235,59 @@ class _SceneState extends State<Scene> {
         iconSize: 30,
       ),
     );
-  //######################################
+    //######################################
   }
 
   AppBar buildAppBar(BuildContext context, int currentIndex) {
-    //########################################################
-    //   the application needs a new appbar for each page,
-    //   in this way I can update it via the current index
-    //   of the bottom nav using a switch. and case.
-    var _items = {1: ProfilePage(), 2: ProfilePage()};
+    ///########################################################
+    ///   the application needs a new appbar for each page,
+    ///   in this way I can update it via the current index
+    ///   of the bottom nav using a switch. and case.
+    var _items = {1: SignIn(), 2: ProfilePage()};
+    //This will choose what appbar will show per page
     switch (currentIndex) {
       case 1:
+      case 2:
         return AppBar(
-          title: TextField(),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                width: 250,
+                height: 30,
+                child: TextField(controller: currentIndex == 1? DiscussionPage.controller : InformationPage.controller,
+                decoration: InputDecoration(
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
+                  filled: true,
+                  counterText: ""
+                  ),
+                  textAlignVertical: TextAlignVertical.center,
+                  maxLength: 15,
+                  maxLengthEnforced: true,
+                  cursorWidth: 0
+                ),
+              ),
+              Container(
+                child: IconButton(
+                    icon: Icon(Icons.search),
+                    onPressed: () {
+                      setState(() {
+                        print("searched ${DiscussionPage.controller.value.text}");
+                      });
+                    }),
+              )
+            ],
+          ),
           actions: <Widget>[
             IconButton(
               icon: Icon(Icons.add_circle),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => (_currentIndex == 1? CreateDiscussion() : CreateInformation())));
+              },
               color: Colors.white,
+              iconSize: 40,
+              
             ),
           ],
         );
@@ -219,11 +296,13 @@ class _SceneState extends State<Scene> {
         return AppBar();
         break;
       case 0:
-      case 2:
       default:
         return AppBar(
           title: Text("Maple Crossing",
-              style: Theme.of(context).textTheme.headline),
+              style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.white
+            ),),
           leading: PopupMenuButton<int>(
             child: Icon(
               Icons.person,
@@ -231,10 +310,7 @@ class _SceneState extends State<Scene> {
             ),
             offset: Offset(0, 80),
             itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 1,
-                child: Text("Notification"),
-              ),
+              
               PopupMenuItem(
                 value: 2,
                 child: Text("Profile"),

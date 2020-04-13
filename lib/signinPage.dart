@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:maple_crossing_application/profile.dart';
+
 import 'Const.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -11,9 +13,7 @@ Future<bool> fetchProfile(String user, String pass) async {
   //build api link
   final response = await http
       .post("https://cpritchar.scweb.ca/mapleCrossing/oauth/token", headers: {
-    HttpHeaders.acceptHeader: "application/json",
-    HttpHeaders.contentTypeHeader: "application/x-www-form-urlencoded"
-  
+    HttpHeaders.acceptHeader: "application/json",  
   }, body: {
     'grant_type': "password",
     'client_id': Const.CLIENT_ID,
@@ -25,12 +25,16 @@ Future<bool> fetchProfile(String user, String pass) async {
   if (response.statusCode == 200) {
     SharedPreferences pref = await SharedPreferences.getInstance();
     final responseJson = json.decode(response.body);
-
     pref.setString('access_token',
         "${responseJson['token_type']} ${responseJson['access_token']}");
     pref.setString('refresh_token',
         "${responseJson['refresh_token']}");
     pref.setInt("expires_in", responseJson['expires_in']);
+
+    User user = await getUser();
+    
+    pref.setInt("user_id", user.id);
+    print("\n\n\n\n\n\n\n${user.id}\n\n\n\n\n\n\n\n\n");
 
     return true;
   } else {
@@ -51,9 +55,7 @@ class SignIn extends StatelessWidget {
 }
 
   MaterialApp buildSignInPage() {
-    return MaterialApp(
-      theme: ThemeData(primaryColor: Color.fromRGBO(254, 95, 95, 1)),
-      home: Scaffold(
+    return buildMaterial(child: Scaffold(
         appBar: AppBar(
           title: Text("Sign In"),
         ),
@@ -154,10 +156,9 @@ class _TextfieldsState extends State<Textfields> {
                         onPressed: () {
                           String email = _emailCon.value.text;
                           String pass = _passwordCon.value.text;
+                          if(_formKey.currentState.validate())
                           fetchProfile(email, pass).then( (val) => val ?  
                           Navigator.push(context,MaterialPageRoute(builder: (context) =>  LoadScreen())) : null);
-                          
-                          
                         })
                   ],
                 ),
@@ -172,7 +173,8 @@ class _TextfieldsState extends State<Textfields> {
                   alignment: Alignment.centerLeft,
                 )
               ],
-            )),
+            ),
+          ),
       ],
     );
   }
