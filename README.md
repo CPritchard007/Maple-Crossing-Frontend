@@ -1,10 +1,11 @@
 # MAPLE CROSSING
 A Flutter application that allows 
 
-+--------------------+<br>
-&nbsp;| ANDROID &emsp;&emsp;| 🟢|<br>
-&nbsp;| IOS&emsp;&emsp;&emsp;&emsp;&emsp;| 🟢|<br>
-+--------------------+
+| Device | Working |
+| :---   | :---: |
+| ANDROID| 🟢|
+| IOS    | 🟢|
+
 
 ## User registration
 
