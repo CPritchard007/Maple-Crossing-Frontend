@@ -10,7 +10,7 @@ A Flutter application that allows cross border workers to see important informat
 ## Prerequisite
 
 add a Const.dart page with the constants as follows:
-<img src="ConstFile.png" width=50%>
+<img src="ReadMe/ConstFile.png" width=50%>
 
 ## User registration
 
