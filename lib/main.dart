@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:maple_crossing_application/DiscussionPage.dart';
-import 'package:maple_crossing_application/EventPage.dart';
 import 'package:maple_crossing_application/HomePage.dart';
 import 'package:maple_crossing_application/InformationPage.dart';
 import 'package:maple_crossing_application/profile.dart';
@@ -12,12 +13,11 @@ import 'package:http/http.dart' as http;
 import 'Const.dart';
 
 void main() {
-  ///######################
-  ///  ( ▷ ) Starting Scene
-  /// 
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   runApp(LoadScreen());
 }
 BuildContext mainContext;
+
 class LoadScreen extends StatelessWidget {
   ///######################################
   ///    The Application will load the
@@ -177,7 +177,6 @@ class _SceneState extends State<Scene> {
     0: HomePage(),
     1: DiscussionPage(),
     2: InformationPage(),
-    3: EventPage(),
   };
 
   @override
@@ -245,7 +244,7 @@ class _SceneState extends State<Scene> {
     ///   in this way I can update it via the current index
     ///   of the bottom nav using a switch. and case.
     var _items = {1: SignIn(), 2: ProfilePage()};
-    
+    //This will choose what appbar will show per page
     switch (currentIndex) {
       case 1:
       case 2:
@@ -300,7 +299,10 @@ class _SceneState extends State<Scene> {
       default:
         return AppBar(
           title: Text("Maple Crossing",
-              style: Theme.of(context).textTheme.title),
+              style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.white
+            ),),
           leading: PopupMenuButton<int>(
             child: Icon(
               Icons.person,
