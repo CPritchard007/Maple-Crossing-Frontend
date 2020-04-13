@@ -14,7 +14,7 @@ description: A new Flutter project.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.2.0 <3.0.0"
+  sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
   flutter:
@@ -23,11 +23,22 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
+  google_maps_flutter: ^0.5.12
+  http: ^0.12.0+4
+  location: ^2.3.5
+  shared_preferences: ^0.5.6
+  lazy_load_scrollview: ^1.0.1
+  flutter_slidable: "^0.4.7"
+  flutter_launcher_icons: "^0.6.1"
+  
+
+  
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+    
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -47,6 +58,22 @@ flutter:
   assets:
     - assets/icons/discussion_button.png
     - assets/icons/events_button.png
+    - assets/icons/eyeClosed.png
+    - assets/icons/welcome_image.png
+    - assets/icons/Shrink.png
+    - assets/icons/trash.png
+    - assets/icons/penTool.png
+    - assets/styling/MapStyle.txt
+  
+  fonts:
+    - family: Verdana
+      fonts: 
+        - asset: assets/fonts/Verdana.ttf
+        - asset: assets/fonts/Verdana Bold.ttf
+          weight: 500
+        - asset: assets/fonts/Verdana Bold.ttf
+          weight: 300
+
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

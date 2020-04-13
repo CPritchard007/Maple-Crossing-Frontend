@@ -1,235 +1,333 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter/services.dart';
+import 'package:maple_crossing_application/DiscussionPage.dart';
+import 'package:maple_crossing_application/HomePage.dart';
+import 'package:maple_crossing_application/InformationPage.dart';
+import 'package:maple_crossing_application/profile.dart';
+import 'package:maple_crossing_application/signinPage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'Const.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  runApp(LoadScreen());
+}
+BuildContext mainContext;
 
-class MyApp extends StatelessWidget {
+class LoadScreen extends StatelessWidget {
+  ///######################################
+  ///    The Application will load the
+  ///    default scene, including the
+  ///    default theme data. after this
+  ///    is added, the application will
+  ///    check if the application contains
+  ///    the users refresh_token, or if
+  ///    the user needs to sign in.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(primaryColor: Color.fromRGBO(254, 95, 95, 1)),
-      home: Scaffold(
-        appBar: new AppBar(
-          bottomOpacity: .3,
-          title: Text("Maple Crossing"),
-        ),
-        body: buildContent(),
-        bottomNavigationBar: BottomNav(),
+    mainContext = context;
+    return 
+      buildMaterial(child: FutureBuilder(
+        
+        future: checkLocalProfileData(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.data) {
+            ///the user has joined into the application previously,
+            ///this will move the user straight to the home page.
+            return Scene(0);
+          } else {
+            ///the user has not signed in yet, so the user is sent to
+            ///the user signin page.
+            return SignIn();
+          }
+        },
       ),
     );
   }
+  ///######################################
+}
 
-  Column buildContent() {
-    return Column(
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
+Widget buildMaterial({Widget child}){
+  return MaterialApp(
+      theme: ThemeData(
+          backgroundColor: Color.fromRGBO(240, 240, 240, 1),
+          primaryColor: Color.fromRGBO(254, 95, 95, 1),
+          fontFamily: 'Verdana',
+          textTheme: TextTheme(
+            display1: TextStyle(
+              fontWeight: FontWeight.w900,
+              color: Colors.black.withAlpha(150)
+            ),
+            headline: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.black.withAlpha(130)
+            ),
+            subhead: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.black.withAlpha(130),
+            ),
+            title: TextStyle(
+              fontWeight: FontWeight.w600
+            ),
+            caption: TextStyle(
+              fontWeight: FontWeight.w600
+            ),
+            body1: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600
+
+            ),
+            body2: TextStyle(
+              fontSize: 15,
+            ),
+            button: TextStyle(color: Colors.black,
+            )
+          )),
+      home: child
+    );
+}
+
+Future<bool> checkLocalProfileData() async {
+  ///########################################
+  ///     does the user need to log in?
+  SharedPreferences pref = await SharedPreferences.getInstance();
+
+  // the application has the users refresh token already?
+  print(pref.getString("refresh_token") != null
+      ? "refresh token:\t🟢" /// YES
+      : "refresh token:\t🔴"); /// NO
+  // the applcation has a current access token?
+  print(pref.getString("access_token") != null
+      ? "access token:\t🟢" /// YES
+      : "access token:\t🔴"); /// NO
+  // the application has a current expired_in date?
+  print(pref.getInt("expires_in") != null
+      ? "expires in:\t🟢" // YES
+      : "expires in:\t🔴"); // NO
+  print(pref.getInt("user_id") != null
+      ? "user_id:\t🟢" // YES
+      : "user_id:\t🔴"); // NO
+  // Print the answer to the console and return to LoadScreen()
+  if (pref.getString("refresh_token") == null ||
+      pref.getString("access_token") == null ||
+      pref.getInt("expires_in") == null ||
+      pref.getInt("expires_in") <= 86400) {
+    return false;
+  } else {
+    // refresh new files for the user
+    getNewCredentials();
+    return true;
+  }
+}
+
+Future<bool> getNewCredentials() async {
+  ///####################################
+  ///    refresh the local values in my phone
+  ///   the application must use the current refresh_token
+  ///   and generate a new refresh_token, access_token and
+  ///   expiration_date each time you log into the application.
+
+  SharedPreferences pref = await SharedPreferences.getInstance();
+  // make a call to the user auth token api, to refresh the data
+  final response = await http
+      .post("https://cpritchar.scweb.ca/mapleCrossing/oauth/token", headers: {
+    HttpHeaders.acceptHeader: "application/json",
+    HttpHeaders.contentTypeHeader: "application/x-www-form-urlencoded",
+  }, body: {
+    'grant_type': "refresh_token",
+    'client_id': Const.CLIENT_ID,
+    'client_secret': Const.CLIENT_SECRET,
+    'refresh_token': pref.getString("refresh_token"),
+  });
+  if (response.statusCode == 200) {
+    ///############################
+    ///  decode the information to
+    ///  allow my application to
+    ///  parse it into the applications
+    ///  SharePreferences (local storage).
+    final jsonResponse = json.decode(response.body);
+    pref.setString('access_token', "Bearer ${jsonResponse['access_token']}");
+    pref.setString('refresh_token', jsonResponse['refresh_token']);
+    pref.setInt('expires_in', jsonResponse['expires_in']);
+  } else {
+    // the application has an error, this shouldnt be called.
+    print("invalid response from application: ${response.statusCode}");
+  }
+
+  //####################################
+}
+
+class Scene extends StatefulWidget {
+  Scene(this.currentPage);
+  final currentPage;
+
+  @override
+  _SceneState createState() => _SceneState(currentPage);
+}
+
+class _SceneState extends State<Scene> {
+  _SceneState(this._currentIndex);
+  int _currentIndex = 0;
+
+  var _page = {
+    0: HomePage(),
+    1: DiscussionPage(),
+    2: InformationPage(),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    ///####################################
+    ///   this is a scene that is used for
+    ///   every page. this builds the
+    ///   applications bottomNav that calls
+    ///   each page once it is pressed.
+
+    return Scaffold(
+      appBar: buildAppBar(context, _currentIndex),
+      body: _page[_currentIndex],
+      //add bottom navagation
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        // add multiple nav items to the bottom navagation bar
+        items: const <BottomNavigationBarItem>[
+          // home page item
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            title: Text("HOME"),
+          ),
+          // discussion page item
+          BottomNavigationBarItem(
+            icon: ImageIcon(AssetImage("assets/icons/discussion_button.png")),
+            title: Text("DISCUSSIONS"),
+          ),
+          // resource information item
+          BottomNavigationBarItem(
+            icon: Icon(Icons.view_quilt),
+            title: Text("INFO"),
+          ),
+          // events item
+          // unable to be completed
+          //
+          //
+          // BottomNavigationBarItem(
+          //     icon: ImageIcon(
+          //       AssetImage("assets/icons/events_button.png"),
+          //     ),
+          //     title: Text("EVENTS"))
+        ],
+        //set the index to the starting index
+        currentIndex: _currentIndex,
+        onTap: (index) => {
+          setState(
+            () {
+              /* once the application is set, then application will set the state,
+               * and update the page with the new current page.
+               */
+              _currentIndex = index;
+            },
+          ),
+        },
+        iconSize: 30,
+      ),
+    );
+    //######################################
+  }
+
+  AppBar buildAppBar(BuildContext context, int currentIndex) {
+    ///########################################################
+    ///   the application needs a new appbar for each page,
+    ///   in this way I can update it via the current index
+    ///   of the bottom nav using a switch. and case.
+    var _items = {1: SignIn(), 2: ProfilePage()};
+    //This will choose what appbar will show per page
+    switch (currentIndex) {
+      case 1:
+      case 2:
+        return AppBar(
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Expanded(
-                child: Text("Border Wait Time: "),
+              Container(
+                width: 250,
+                height: 30,
+                child: TextField(controller: currentIndex == 1? DiscussionPage.controller : InformationPage.controller,
+                decoration: InputDecoration(
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
+                  filled: true,
+                  counterText: ""
+                  ),
+                  textAlignVertical: TextAlignVertical.center,
+                  maxLength: 15,
+                  maxLengthEnforced: true,
+                  cursorWidth: 0
+                ),
               ),
-              DropDown()
+              Container(
+                child: IconButton(
+                    icon: Icon(Icons.search),
+                    onPressed: () {
+                      setState(() {
+                        print("searched ${DiscussionPage.controller.value.text}");
+                      });
+                    }),
+              )
             ],
           ),
-        ),
-        buildBorderWaitTime(),
-        Expanded(
-          child: Container(
-          child: Map(),
-          margin: EdgeInsets.all(10),
-          ),
-          )
-      ],
-    );
-  }
-
-  Padding buildBorderWaitTime() {
-    return Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: Row(
-          children: <Widget>[
-            Expanded(
-                child: Container(
-              height: 180,
-              margin: const EdgeInsets.all(4.0),
-              padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
-              decoration: new BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: new BorderRadius.circular(10),
-                  boxShadow: [
-                    new BoxShadow(
-                        blurRadius: 8, spreadRadius: 2, offset: Offset(2, 1))
-                  ]),
-              child: Column(
-                children: <Widget>[
-                  Icon(
-                    Icons.headset,
-                    size: 50,
-                    color: Color.fromRGBO(0, 0, 0, 0.6),
-                  ),
-                  Spacer(
-                    flex: 3,
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "15 MINS",
-                      style: TextStyle(
-                          fontSize: 30, fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                  Spacer(
-                    flex: 1,
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Detroit Tunnel",
-                      style: TextStyle(
-                        fontSize: 21,
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            )),
-            Expanded(
-                child: Container(
-              height: 180,
-              margin: const EdgeInsets.all(4.0),
-              padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
-              decoration: new BoxDecoration(
-                  color: Colors.green,
-                  borderRadius: new BorderRadius.circular(10),
-                  boxShadow: [
-                    new BoxShadow(
-                        blurRadius: 8, spreadRadius: 2, offset: Offset(2, 1))
-                  ]),
-              child: Column(
-                children: <Widget>[
-                  Icon(
-                    Icons.headset,
-                    size: 50,
-                    color: Color.fromRGBO(0, 0, 0, 0.6),
-                  ),
-                  Spacer(
-                    flex: 3,
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "5 MINS",
-                      style: TextStyle(
-                          fontSize: 30, fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                  Spacer(
-                    flex: 1,
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Ambasador Bridge",
-                      style: TextStyle(
-                        fontSize: 21,
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            )),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.add_circle),
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => (_currentIndex == 1? CreateDiscussion() : CreateInformation())));
+              },
+              color: Colors.white,
+              iconSize: 40,
+              
+            ),
           ],
-        ),
-      );
-  }
-}
-
-class BottomNav extends StatefulWidget {
-  @override
-  _BottomNavState createState() => _BottomNavState();
-}
-
-class _BottomNavState extends State<BottomNav> {
-  int _currentIndex = 0;
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      items: <BottomNavigationBarItem>[
-        BottomNavigationBarItem(icon: Icon(Icons.home), title: Text("Home")),
-        BottomNavigationBarItem(
-            icon: ImageIcon(AssetImage("assets/icons/discussion_button.png")),
-            title: Text("Discussion")),
-        BottomNavigationBarItem(
-            icon: ImageIcon(AssetImage("assets/icons/events_button.png")),
-            title: Text("Events"))
-      ],
-      currentIndex: _currentIndex,
-      onTap: (index) => {
-        setState(() {
-          _currentIndex = index;
-        })
-      },
-    );
-  }
-}
-
-class DropDown extends StatefulWidget {
-  @override
-  _DropDownState createState() => _DropDownState();
-}
-
-class _DropDownState extends State<DropDown> {
-  String dropdownValue = "CAN \u2192 USA";
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButton<String>(
-      value: dropdownValue,
-      icon: Icon(Icons.keyboard_arrow_down),
-      iconSize: 24,
-      elevation: 16,
-      // style: TextStyle(color: Colors.deepPurple),
-      underline: Container(
-        height: 2,
-        color: Color.fromRGBO(254, 95, 95, 1),
-      ),
-      onChanged: (String newValue) {
-        setState(() {
-          dropdownValue = newValue;
-        });
-      },
-      items: <String>['CAN \u2192 USA', 'USA \u2192 CAN']
-          .map<DropdownMenuItem<String>>((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
         );
-      }).toList(),
-    );
-  }
-}
-
-class Map extends StatefulWidget {
-  @override
-  _MapState createState() => _MapState();
-}
-
-class _MapState extends State<Map> {
-  GoogleMapController mapController;
-
-  final LatLng _center = const LatLng(45.521563, -122.677433);
-
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-  }
-  @override
-  Widget build(BuildContext context) {
-    return GoogleMap(
-          onMapCreated: _onMapCreated,
-          initialCameraPosition: CameraPosition(
-            target: _center,
-            zoom: 11.0,
+        break;
+      case 3:
+        return AppBar();
+        break;
+      case 0:
+      default:
+        return AppBar(
+          title: Text("Maple Crossing",
+              style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.white
+            ),),
+          leading: PopupMenuButton<int>(
+            child: Icon(
+              Icons.person,
+              size: 40,
+            ),
+            offset: Offset(0, 80),
+            itemBuilder: (context) => [
+              
+              PopupMenuItem(
+                value: 2,
+                child: Text("Profile"),
+              ),
+            ],
+            onSelected: (index) => {
+              setState(
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => _items[index]),
+                  );
+                },
+              )
+            },
           ),
-    );
+        );
+    }
   }
 }
