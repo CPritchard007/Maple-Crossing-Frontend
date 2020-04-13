@@ -1,11 +1,16 @@
 # MAPLE CROSSING
-A Flutter application that allows 
+A Flutter application that allows cross border workers to see important information before crossing the border. This can include the Exchange rate, Border Wait time, or Traffic.
 
 | Device | Working |
 | :---   | :---: |
 | ANDROID| 🟢|
 | IOS    | 🟢|
 
+
+## Prerequisite
+
+add a Const.dart page with the constants as follows:
+<img src="ConstFile.png" width=50%>
 
 ## User registration
 
